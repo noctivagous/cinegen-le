@@ -1,0 +1,1321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CineGen - Script-First Film Pre-Production</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+    
+    :root {
+        --bg-primary: #0f172a;
+        --bg-secondary: #1e293b;
+        --bg-tertiary: #334155;
+        --accent: #3b82f6;
+        --accent-hover: #2563eb;
+        --text-primary: #f1f5f9;
+        --text-secondary: #cbd5e1;
+        --text-muted: #64748b;
+        --border: #334155;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+        font-family: 'Inter', sans-serif;
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        overflow-x: hidden;
+    }
+    .font-display { font-family: 'Space Grotesk', sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+    .glass {
+        background: rgba(30, 41, 59, 0.6);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(51, 65, 85, 0.5);
+    }
+    .card-hover {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .card-hover:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+        border-color: var(--accent);
+    }
+    .tab-active {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    }
+    .top-tab-active {
+        border-bottom: 2px solid var(--accent);
+        color: var(--accent);
+    }
+    .floorplan-grid {
+        background-image: 
+            linear-gradient(rgba(59, 130, 246, 0.15) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(59, 130, 246, 0.15) 1px, transparent 1px);
+        background-size: 20px 20px;
+        background-position: center;
+    }
+    .camera-marker {
+        cursor: move;
+        transition: all 0.2s ease;
+        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+    }
+    .camera-marker:hover {
+        transform: scale(1.2);
+        filter: drop-shadow(0 4px 8px rgba(59, 130, 246, 0.6));
+    }
+    .dragging { opacity: 0.7; z-index: 1000; }
+
+    .slider::-webkit-slider-thumb {
+        appearance: none;
+        width: 16px; height: 16px; border-radius: 50%;
+        background: var(--accent); cursor: pointer;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+    .slider::-moz-range-thumb {
+        width: 16px; height: 16px; border-radius: 50%;
+        background: var(--accent); cursor: pointer; border: none;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+    .toggle-switch { position: relative; width: 44px; height: 24px; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+        position: absolute; cursor: pointer; top:0; left:0; right:0; bottom:0;
+        background-color: var(--bg-tertiary); transition: 0.3s; border-radius: 24px;
+    }
+    .toggle-slider:before {
+        position: absolute; content: ""; height: 18px; width: 18px; left:3px; bottom:3px;
+        background-color: white; transition: 0.3s; border-radius: 50%;
+    }
+    input:checked + .toggle-slider { background-color: var(--accent); }
+    input:checked + .toggle-slider:before { transform: translateX(20px); }
+
+    .locked-overlay {
+        position: absolute; inset:0;
+        background: rgba(15, 23, 42, 0.85);
+        backdrop-filter: blur(4px);
+        display: flex; align-items:center; justify-content:center;
+        border-radius: 0.5rem; z-index:10;
+    }
+    .backdrop-placeholder {
+        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+        position: relative; overflow: hidden;
+    }
+    .backdrop-placeholder::before {
+        content: ''; position: absolute; top:-50%; left:-50%; width:200%; height:200%;
+        background: linear-gradient(45deg, transparent, rgba(59,130,246,0.1), transparent);
+        animation: shimmer 3s infinite;
+    }
+    @keyframes shimmer {
+        0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+        100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+    }
+    .loading-pulse { animation: pulse 2s cubic-bezier(0.4,0,0.6,1) infinite; }
+    @keyframes pulse { 0%,100% {opacity:1} 50% {opacity:0.5} }
+
+    .scrollbar-thin::-webkit-scrollbar { width:6px; height:6px; }
+    .scrollbar-thin::-webkit-scrollbar-track { background: var(--bg-secondary); }
+    .scrollbar-thin::-webkit-scrollbar-thumb { background: var(--bg-tertiary); border-radius:3px; }
+    .scrollbar-thin::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+    .editor-wrap {
+        background: #0b1220;
+        border: 1px solid #1f2a44;
+        border-radius: 0.75rem;
+        overflow: hidden;
+    }
+    .editor-toolbar {
+        background: #0f172a;
+        border-bottom: 1px solid #1f2a44;
+    }
+    .editor-textarea {
+        background: transparent;
+        color: #e2e8f0;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 13.5px;
+        line-height: 1.7;
+        tab-size: 4;
+        resize: none;
+    }
+    .editor-textarea:focus { outline: none; }
+    .line-numbers {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 13.5px;
+        line-height: 1.7;
+        color: #475569;
+        user-select: none;
+        text-align: right;
+        padding-right: 1rem;
+    }
+    .diff-banner {
+        background: linear-gradient(90deg, rgba(245,158,11,0.15), rgba(245,158,11,0));
+        border: 1px solid rgba(245,158,11,0.4);
+    }
+    .shot-pill {
+        transition: all 0.2s;
+    }
+    .shot-pill.active {
+        background: #3b82f6;
+        color: white;
+        box-shadow: 0 0 0 2px rgba(59,130,246,0.3);
+    }
+    .shot-pill:hover { background: #334155; }
+    .frame-canvas {
+        background: radial-gradient(ellipse at center, #1e293b 0%, #0f172a 100%);
+        aspect-ratio: 16/9;
+    }
+    .guide-grid {
+        background-image: 
+            linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px);
+        background-size: 33.33% 33.33%;
+    }
+    .storyboard-frame.selected {
+        outline: 2px solid #3b82f6;
+        box-shadow: 0 0 0 4px rgba(59,130,246,0.2);
+    }
+    @media (max-width: 768px) {
+        .mobile-hide { display: none; }
+    }
+</style>
+</head>
+<body class="antialiased">
+<div class="flex h-screen overflow-hidden">
+    <!-- Left Vertical Navigation -->
+    <aside class="w-16 md:w-64 bg-[#1e293b] border-r border-slate-700 flex flex-col">
+        <div class="p-4 border-b border-slate-700">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center">
+                    <i class="fas fa-film text-white text-sm"></i>
+                </div>
+                <span class="font-display font-bold text-lg mobile-hide">CineGen</span>
+            </div>
+        </div>
+        
+        <nav class="flex-1 p-2 space-y-1 overflow-y-auto scrollbar-thin">
+            <button data-left-tab="Script" class="left-tab w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-all hover:bg-slate-700/50 text-slate-300">
+                <i class="fas fa-scroll w-5 text-center"></i>
+                <span class="mobile-hide">Script</span>
+            </button>
+            <button data-left-tab="Breakdown" class="left-tab w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-all hover:bg-slate-700/50 text-slate-300">
+                <i class="fas fa-list-check w-5 text-center"></i>
+                <span class="mobile-hide">Breakdown</span>
+            </button>
+            <button data-left-tab="Entities" class="left-tab tab-active w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-all text-white">
+                <i class="fas fa-cube w-5 text-center"></i>
+                <span class="mobile-hide">Entities</span>
+            </button>
+            <button data-left-tab="Beats & Structure" class="left-tab w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-all hover:bg-slate-700/50 text-slate-300">
+                <i class="fas fa-chart-line w-5 text-center"></i>
+                <span class="mobile-hide">Beats & Structure</span>
+            </button>
+            <button data-left-tab="Visuals" class="left-tab w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-all hover:bg-slate-700/50 text-slate-300">
+                <i class="fas fa-palette w-5 text-center"></i>
+                <span class="mobile-hide">Visuals</span>
+            </button>
+            <button data-left-tab="Production" class="left-tab w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-all hover:bg-slate-700/50 text-slate-300">
+                <i class="fas fa-clapperboard w-5 text-center"></i>
+                <span class="mobile-hide">Production</span>
+            </button>
+        </nav>
+
+        <div class="p-4 border-t border-slate-700 mobile-hide">
+            <div class="flex items-center gap-3 px-2">
+                <img src="https://i.pravatar.cc/40?img=8" alt="User" class="w-8 h-8 rounded-full">
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium truncate">Alex Chen</p>
+                    <p class="text-xs text-slate-400 truncate">Director</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="flex-1 flex flex-col overflow-hidden">
+        <!-- Top Horizontal Tabs -->
+        <header class="bg-[#1e293b] border-b border-slate-700">
+            <div class="flex items-center justify-between px-6 py-3">
+                <div id="top-tabs" class="flex items-center gap-1 overflow-x-auto scrollbar-thin"></div>
+                <div class="flex items-center gap-3">
+                    <button id="global-render" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-medium transition-all">
+                        <i class="fas fa-play mr-2"></i>Render Preview
+                    </button>
+                    <button class="w-9 h-9 rounded-lg hover:bg-slate-700 flex items-center justify-center transition-all">
+                        <i class="fas fa-bell text-slate-400"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Content Panels -->
+        <main class="flex-1 overflow-y-auto bg-[#0f172a] p-6 scrollbar-thin">
+            <!-- Script Content -->
+            <div id="script-content" class="content-panel hidden">
+                <div id="editor-panel" class="sub-panel">
+                    <div id="diff-banner" class="diff-banner hidden mb-4 rounded-lg p-3 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-code-branch text-amber-400"></i>
+                            <div>
+                                <p class="text-sm font-medium text-amber-300">Script changed since last sync</p>
+                                <p class="text-xs text-amber-200/80">Entities, breakdown and boards may be out of date.</p>
+                            </div>
+                        </div>
+                        <button id="reparse-btn" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-slate-900 rounded-lg text-xs font-semibold">
+                            Parse & Sync
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                        <!-- Editor -->
+                        <div class="xl:col-span-2 editor-wrap">
+                            <div class="editor-toolbar px-4 py-2 flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <span class="text-xs uppercase tracking-wider text-slate-400">Screenplay.fdx</span>
+                                    <span class="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 rounded text-[10px] font-medium">PARSED</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <button class="w-8 h-8 rounded hover:bg-slate-700 flex items-center justify-center text-slate-400"><i class="fas fa-search"></i></button>
+                                    <button class="w-8 h-8 rounded hover:bg-slate-700 flex items-center justify-center text-slate-400"><i class="fas fa-ellipsis"></i></button>
+                                </div>
+                            </div>
+                            <div class="flex">
+                                <div id="line-numbers" class="line-numbers pl-4 py-4 w-12 bg-[#0b1220] border-r border-slate-800">1</div>
+                                <textarea id="script-editor" class="editor-textarea flex-1 p-4 h-[650px] scrollbar-thin"></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Outline -->
+                        <div class="space-y-6">
+                            <div class="glass rounded-xl p-5">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h3 class="font-display font-semibold">Parsed Outline</h3>
+                                    <button id="parse-sync-btn" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 rounded-lg text-xs font-medium">
+                                        <i class="fas fa-sync mr-1"></i>Parse & Sync
+                                    </button>
+                                </div>
+                                <div class="space-y-4" id="outline-lists">
+                                    <!-- injected -->
+                                </div>
+                                <div class="mt-4 pt-4 border-t border-slate-700 text-xs text-slate-400">
+                                    Last sync: <span id="last-sync">just now</span>
+                                </div>
+                            </div>
+
+                            <div class="glass rounded-xl p-5">
+                                <h3 class="font-display font-semibold mb-3">Sync Targets</h3>
+                                <ul class="space-y-2 text-sm">
+                                    <li class="flex items-center justify-between"><span class="text-slate-300">Breakdown → Scene List</span><i class="fas fa-check-circle text-emerald-500"></i></li>
+                                    <li class="flex items-center justify-between"><span class="text-slate-300">Entities → Locations/Props</span><i class="fas fa-check-circle text-emerald-500"></i></li>
+                                    <li class="flex items-center justify-between"><span class="text-slate-300">Visuals → Storyboards</span><i class="fas fa-check-circle text-emerald-500"></i></li>
+                                    <li class="flex items-center justify-between"><span class="text-slate-300">Wardrobe continuity</span><i class="fas fa-circle-notch text-slate-600"></i></li>
+                                </ul>
+                            </div>
+
+                            <div class="glass rounded-xl p-5">
+                                <h3 class="font-display font-semibold mb-3">Script Stats</h3>
+                                <div class="grid grid-cols-2 gap-3 text-center">
+                                    <div class="bg-slate-800/60 rounded-lg p-3">
+                                        <div class="text-2xl font-display font-bold" id="stat-pages">21</div>
+                                        <div class="text-xs text-slate-400">Pages</div>
+                                    </div>
+                                    <div class="bg-slate-800/60 rounded-lg p-3">
+                                        <div class="text-2xl font-display font-bold" id="stat-scenes">7</div>
+                                        <div class="text-xs text-slate-400">Scenes</div>
+                                    </div>
+                                    <div class="bg-slate-800/60 rounded-lg p-3">
+                                        <div class="text-2xl font-display font-bold" id="stat-characters">4</div>
+                                        <div class="text-xs text-slate-400">Characters</div>
+                                    </div>
+                                    <div class="bg-slate-800/60 rounded-lg p-3">
+                                        <div class="text-2xl font-display font-bold" id="stat-duration">24m</div>
+                                        <div class="text-xs text-slate-400">Est. Runtime</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="revisions-panel" class="sub-panel hidden">
+                    <div class="flex items-center justify-center h-96 text-slate-500">
+                        <div class="text-center">
+                            <i class="fas fa-code-branch text-5xl mb-4"></i>
+                            <p>Revisions timeline coming soon</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="notes-panel" class="sub-panel hidden">
+                    <div class="flex items-center justify-center h-96 text-slate-500">
+                        <div class="text-center">
+                            <i class="fas fa-sticky-note text-5xl mb-4"></i>
+                            <p>Collaborative notes coming soon</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Entities Content -->
+            <div id="entities-content" class="content-panel">
+                <!-- Locations -->
+                <div id="locations-panel" class="sub-panel">
+                    <div class="mb-6 flex items-center justify-between">
+                        <div>
+                            <h2 class="font-display text-2xl font-bold mb-1">Locations</h2>
+                            <p class="text-slate-400 text-sm">Manage sets, camera blocking, and environment assets</p>
+                        </div>
+                        <button class="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-medium transition-all">
+                            <i class="fas fa-plus mr-2"></i>Add Location
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 xl:grid-cols-2 gap-6" id="locations-grid">
+                        <!-- Location cards injected / existing -->
+                        <div class="location-card glass rounded-xl overflow-hidden card-hover" data-location="INT. APARTMENT - NIGHT">
+                            <div class="p-5 border-b border-slate-700">
+                                <div class="flex items-start justify-between mb-3">
+                                    <div>
+                                        <h3 class="font-display font-semibold text-lg mb-1">INT. APARTMENT - NIGHT</h3>
+                                        <div class="flex items-center gap-3 text-xs text-slate-400">
+                                            <span><i class="fas fa-film mr-1"></i>Scenes: 1, 3, 7, 12</span>
+                                            <span><i class="fas fa-camera mr-1"></i>Shots: 8</span>
+                                        </div>
+                                    </div>
+                                    <div class="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-xs font-medium">75% Ready</div>
+                                </div>
+                                <div class="grid grid-cols-4 gap-2">
+                                    <div class="backdrop-placeholder aspect-video rounded-lg"></div>
+                                    <div class="backdrop-placeholder aspect-video rounded-lg"></div>
+                                    <div class="backdrop-placeholder aspect-video rounded-lg border-2 border-blue-500"></div>
+                                    <div class="backdrop-placeholder aspect-video rounded-lg"></div>
+                                </div>
+                            <div class="p-5 bg-slate-900/50">
+                                <h4 class="text-sm font-semibold mb-3 text-slate-300">Plan View</h4>
+                                <div class="floorplan-grid relative aspect-[4/3] rounded-lg border border-slate-700 mb-4">
+                                    <div class="camera-marker absolute top-[30%] left-[25%]" data-cam="1">
+                                        <div class="relative">
+                                            <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-xs font-bold">1</div>
+                                            <div class="absolute -rotate-45 top-6 left-3 w-0 h-0 border-l-[15px] border-l-transparent border-r-[15px] border-r-transparent border-t-[20px] border-t-blue-500/30"></div>
+                                        </div>
+                                    </div>
+                                    <div class="camera-marker absolute top-[60%] left-[70%]" data-cam="2">
+                                        <div class="relative">
+                                            <div class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center text-xs font-bold">2</div>
+                                            <div class="absolute rotate-180 top-6 left-3 w-0 h-0 border-l-[15px] border-l-transparent border-r-[15px] border-r-transparent border-t-[20px] border-t-purple-500/30"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="space-y-3 text-sm">
+                                    <div class="flex items-center justify-between">
+                                        <label class="text-slate-400">Shot Type</label>
+                                        <select class="bg-slate-800 border border-slate-700 rounded px-3 py-1 text-xs">
+                                            <option>Wide Shot</option><option>Medium Shot</option><option selected>Close-up</option>
+                                        </select>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <label class="text-slate-400">Lighting Setup</label>
+                                        <select class="bg-slate-800 border border-slate-700 rounded px-3 py-1 text-xs">
+                                            <option>3-Point</option><option>High Key</option><option selected>Low Key</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <button class="generate-backdrop w-full mt-4 px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg text-sm font-medium">
+                                    <i class="fas fa-wand-magic-sparkles mr-2"></i>Generate Backdrop
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="location-card glass rounded-xl overflow-hidden card-hover" data-location="EXT. ALLEY - RAIN">
+                            <div class="p-5 border-b border-slate-700">
+                                <div class="flex items-start justify-between mb-3">
+                                    <div>
+                                        <h3 class="font-display font-semibold text-lg mb-1">EXT. ALLEY - RAIN</h3>
+                                        <div class="flex items-center gap-3 text-xs text-slate-400">
+                                            <span><i class="fas fa-film mr-1"></i>Scenes: 5, 9</span>
+                                            <span><i class="fas fa-camera mr-1"></i>Shots: 4</span>
+                                        </div>
+                                    </div>
+                                    <div class="px-3 py-1 bg-yellow-500/20 text-yellow-400 rounded-full text-xs font-medium">40% Ready</div>
+                                </div>
+                                <div class="grid grid-cols-4 gap-2">
+                                    <div class="backdrop-placeholder aspect-video rounded-lg"></div>
+                                    <div class="backdrop-placeholder aspect-video rounded-lg border-2 border-blue-500"></div>
+                                    <div class="backdrop-placeholder aspect-video rounded-lg"></div>
+                                    <div class="backdrop-placeholder aspect-video rounded-lg"></div>
+                                </div>
+                            </div>
+                            <div class="p-5 bg-slate-900/50">
+                                <h4 class="text-sm font-semibold mb-3 text-slate-300">Plan View</h4>
+                                <div class="floorplan-grid relative aspect-[4/3] rounded-lg border border-slate-700 mb-4">
+                                    <div class="camera-marker absolute top-[45%] left-[15%]" data-cam="1">
+                                        <div class="relative">
+                                            <div class="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center text-xs font-bold">1</div>
+                                        </div>
+                                    </div>
+                                <div class="space-y-3 text-sm">
+                                    <div class="flex items-center justify-between">
+                                        <label class="text-slate-400">Shot Type</label>
+                                        <select class="bg-slate-800 border border-slate-700 rounded px-3 py-1 text-xs">
+                                            <option selected>Wide Shot</option><option>Medium Shot</option>
+                                        </select>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <label class="text-slate-400">Lighting Setup</label>
+                                        <select class="bg-slate-800 border border-slate-700 rounded px-3 py-1 text-xs">
+                                            <option selected>Natural</option><option>Low Key</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <button class="generate-backdrop w-full mt-4 px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg text-sm font-medium">
+                                    <i class="fas fa-wand-magic-sparkles mr-2"></i>Generate Backdrop
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Props -->
+                <div id="props-panel" class="sub-panel hidden">
+                    <div class="mb-6 flex items-center justify-between">
+                        <div>
+                            <h2 class="font-display text-2xl font-bold mb-1">Props</h2>
+                            <p class="text-slate-400 text-sm">Track physical objects and continuity across scenes</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-sm font-medium"><i class="fas fa-file-import mr-2"></i>Import CSV</button>
+                            <button class="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-medium"><i class="fas fa-plus mr-2"></i>Add Prop</button>
+                        </div>
+                    </div>
+                    <div class="flex flex-col md:flex-row gap-3 mb-6">
+                        <div class="flex-1 relative">
+                            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
+                            <input type="text" id="prop-search" placeholder="Search props..." class="w-full bg-slate-800 border border-slate-700 rounded-lg pl-10 pr-4 py-2 text-sm focus:outline-none focus:border-blue-500">
+                        </div>
+                        <select id="prop-filter" class="bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-sm">
+                            <option value="all">All Status</option>
+                            <option value="needed">Needed</option>
+                            <option value="acquired">Acquired</option>
+                            <option value="onset">On Set</option>
+                        </select>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" id="props-grid">
+                        <!-- Prop cards injected -->
+                    </div>
+                </div>
+
+                <!-- Wardrobe -->
+                <div id="wardrobe-panel" class="sub-panel hidden">
+                    <div class="mb-6 flex items-center justify-between">
+                        <div>
+                            <h2 class="font-display text-2xl font-bold mb-1">Wardrobe</h2>
+                            <p class="text-slate-400 text-sm">Character looks and continuity management</p>
+                        </div>
+                        <button class="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-medium"><i class="fas fa-plus mr-2"></i>New Look</button>
+                    </div>
+                    <div id="wardrobe-list" class="space-y-6"></div>
+                </div>
+
+                <!-- Cast -->
+                <div id="cast-panel" class="sub-panel hidden">
+                    <div class="flex items-center justify-center h-96 text-slate-500">
+                        <div class="text-center"><i class="fas fa-users text-5xl mb-4"></i><p>Cast profiles synced from script</p></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Breakdown -->
+            <div id="breakdown-content" class="content-panel hidden">
+                <div id="scene-list-panel" class="sub-panel">
+                    <div class="glass rounded-xl p-6">
+                        <h2 class="font-display text-2xl font-bold mb-4">Scene List</h2>
+                        <div id="scene-table" class="divide-y divide-slate-800"></div>
+                    </div>
+                </div>
+                <div id="schedule-panel" class="sub-panel hidden"><div class="flex items-center justify-center h-96 text-slate-500"><p>Scheduling board</p></div></div>
+                <div id="budget-panel" class="sub-panel hidden"><div class="flex items-center justify-center h-96 text-slate-500"><p>Budget breakdown</p></div></div>
+            </div>
+
+            <!-- Beats -->
+            <div id="beats-content" class="content-panel hidden">
+                <div class="flex items-center justify-center h-96 text-slate-500"><i class="fas fa-chart-line text-5xl mb-4"></i><p>Beats & Structure coming soon</p></div>
+            </div>
+
+            <!-- Visuals -->
+            <div id="visuals-content" class="content-panel hidden">
+                <!-- Storyboards -->
+                <div id="storyboards-panel" class="sub-panel">
+                    <div class="mb-6 flex items-center justify-between">
+                        <div>
+                            <h2 class="font-display text-2xl font-bold mb-1">Storyboards</h2>
+                            <p class="text-slate-400 text-sm">Frames auto-generated from script beats and entities</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs text-slate-400">Filter:</span>
+                            <select id="storyboard-filter" class="bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-xs">
+                                <option value="all">All Locations</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="storyboard-groups" class="space-y-8"></div>
+                </div>
+
+                <!-- Shot Composer -->
+                <div id="shot-composer-panel" class="sub-panel hidden">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h2 class="font-display text-2xl font-bold mb-1">Shot Composer</h2>
+                            <p class="text-slate-400 text-sm">Compose, lock, and generate frames with entity continuity</p>
+                        </div>
+                        <button id="open-in-storyboard" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 rounded-lg text-xs"><i class="fas fa-arrow-left mr-1"></i>Back to Boards</button>
+                    </div>
+
+                    <!-- Shot Navigator -->
+                    <div class="glass rounded-xl p-3 mb-6 flex items-center gap-2 overflow-x-auto scrollbar-thin" id="shot-navigator"></div>
+
+                    <div class="grid grid-cols-1 xl:grid-cols-[1.1fr_0.9fr_0.8fr] gap-6">
+                        <!-- Left Canvas -->
+                        <div class="space-y-4">
+                            <div class="frame-canvas guide-grid rounded-xl border border-slate-700 relative overflow-hidden">
+                                <div class="absolute inset-0 flex items-center justify-center">
+                                    <div class="text-center">
+                                        <div id="composer-preview-icon" class="w-20 h-20 mx-auto mb-3 rounded-full bg-slate-800 flex items-center justify-center">
+                                            <i class="fas fa-camera text-2xl text-slate-500"></i>
+                                        </div>
+                                        <p class="text-sm text-slate-400" id="composer-preview-label">No frame generated yet</p>
+                                    </div>
+                                <div class="absolute top-3 left-3 px-2 py-1 bg-black/60 rounded text-[10px] tracking-wider" id="composer-shot-label">1A</div>
+                                <div class="absolute bottom-3 right-3 px-2 py-1 bg-black/60 rounded text-[10px]" id="composer-location-tag">INT. APARTMENT - NIGHT</div>
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="flex-1 px-3 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs"><i class="fas fa-expand mr-1"></i>Guides</button>
+                                <button class="flex-1 px-3 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs"><i class="fas fa-layer-group mr-1"></i>Overlays</button>
+                                <button class="flex-1 px-3 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs"><i class="fas fa-ruler-combined mr-1"></i>Grid</button>
+                            </div>
+                        </div>
+
+                        <!-- Center Controls -->
+                        <div class="space-y-5">
+                            <div class="glass rounded-xl p-5">
+                                <h3 class="font-semibold mb-3 text-sm uppercase tracking-wider text-slate-300">Camera</h3>
+                                <div class="space-y-3 text-sm">
+                                    <div class="flex items-center justify-between">
+                                        <label class="text-slate-400">Shot Type</label>
+                                        <select id="composer-shot-type" class="bg-slate-800 border border-slate-700 rounded px-3 py-1.5 text-xs w-40">
+                                            <option>Wide Shot</option><option>Medium Shot</option><option>Close-up</option><option>Extreme Close-up</option>
+                                        </select>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <label class="text-slate-400">Angle</label>
+                                        <select id="composer-angle" class="bg-slate-800 border border-slate-700 rounded px-3 py-1.5 text-xs w-40">
+                                            <option>Eye Level</option><option>High Angle</option><option>Low Angle</option><option>Dutch Angle</option>
+                                        </select>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <label class="text-slate-400">Movement</label>
+                                        <select id="composer-movement" class="bg-slate-800 border border-slate-700 rounded px-3 py-1.5 text-xs w-40">
+                                            <option>Static</option><option>Dolly</option><option>Orbit</option><option>Pan</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <div class="flex items-center justify-between mb-1">
+                                            <label class="text-slate-400">FOV</label>
+                                            <span class="text-xs" id="composer-fov-val">35mm</span>
+                                        </div>
+                                        <input id="composer-fov" type="range" min="18" max="85" value="35" class="slider w-full h-1 bg-slate-700 rounded-lg appearance-none">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="glass rounded-xl p-5">
+                                <h3 class="font-semibold mb-3 text-sm uppercase tracking-wider text-slate-300">Lighting</h3>
+                                <select id="composer-lighting" class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm">
+                                    <option>3-Point</option><option>High Key</option><option selected>Low Key</option><option>Natural</option>
+                                </select>
+                                <p class="text-xs text-slate-500 mt-2">Synced from location setup</p>
+                            </div>
+
+                            <div class="glass rounded-xl p-5">
+                                <h3 class="font-semibold mb-3 text-sm uppercase tracking-wider text-slate-300">Character Locks</h3>
+                                <div id="composer-char-locks" class="space-y-3"></div>
+                            </div>
+
+                            <div class="glass rounded-xl p-5">
+                                <h3 class="font-semibold mb-3 text-sm uppercase tracking-wider text-slate-300">Prop Continuity</h3>
+                                <div id="composer-props" class="space-y-2 text-sm"></div>
+                            </div>
+
+                            <button id="generate-frame-btn" class="w-full px-4 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 rounded-xl font-medium">
+                                <i class="fas fa-wand-magic-sparkles mr-2"></i>Generate Frame
+                            </button>
+                        </div>
+
+                        <!-- Right Inspector -->
+                        <div class="space-y-5">
+                            <div class="glass rounded-xl p-5">
+                                <h3 class="font-semibold mb-3 text-sm uppercase tracking-wider text-slate-300">Shot Metadata</h3>
+                                <dl class="text-sm space-y-2">
+                                    <div class="flex justify-between"><dt class="text-slate-500">Scene</dt><dd id="ins-scene" class="text-slate-200">1</dd></div>
+                                    <div class="flex justify-between"><dt class="text-slate-500">Shot</dt><dd id="ins-shot" class="text-slate-200">1A</dd></div>
+                                    <div class="flex justify-between"><dt class="text-slate-500">Location</dt><dd id="ins-location" class="text-slate-200">INT. APARTMENT - NIGHT</dd></div>
+                                    <div class="flex justify-between"><dt class="text-slate-500">Characters</dt><dd id="ins-characters" class="text-slate-200">MIRA</dd></div>
+                                    <div class="flex justify-between"><dt class="text-slate-500">Status</dt><dd id="ins-status" class="text-amber-400">Draft</dd></div>
+                                </dl>
+                            </div>
+
+                            <div class="glass rounded-xl p-5">
+                                <h3 class="font-semibold mb-3 text-sm uppercase tracking-wider text-slate-300">Prompt Preview</h3>
+                                <pre id="prompt-preview" class="bg-slate-900/70 rounded-lg p-3 text-xs text-slate-300 whitespace-pre-wrap leading-relaxed">Close-up of MIRA, low key lighting, 35mm, static camera...</pre>
+                            </div>
+
+                            <div class="glass rounded-xl p-5">
+                                <h3 class="font-semibold mb-3 text-sm uppercase tracking-wider text-slate-300">References</h3>
+                                <div class="grid grid-cols-3 gap-2">
+                                    <div class="backdrop-placeholder aspect-video rounded"></div>
+                                    <div class="backdrop-placeholder aspect-video rounded"></div>
+                                    <div class="bg-slate-800 rounded flex items-center justify-center aspect-video"><i class="fas fa-tshirt text-slate-600"></i></div>
+                                </div>
+                                <p class="text-[11px] text-slate-500 mt-2">Backdrops & wardrobe refs pulled from Entities</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="color-script-panel" class="sub-panel hidden">
+                    <div class="flex items-center justify-center h-96 text-slate-500"><p>Color script development</p></div>
+                </div>
+                <div id="look-dev-panel" class="sub-panel hidden">
+                    <div class="flex items-center justify-center h-96 text-slate-500"><p>Look development</p></div>
+                </div>
+            </div>
+
+            <!-- Production -->
+            <div id="production-content" class="content-panel hidden">
+                <div class="flex items-center justify-center h-96 text-slate-500"><p>Production tools coming soon</p></div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<script>
+const CineGen = (() => {
+    const state = {
+        script: '',
+        parsed: { scenes: [], characters: [], locations: [], props: [] },
+        lastSyncHash: '',
+        storyboard: [],
+        currentShotId: null,
+        wardrobe: [],
+        propsData: []
+    };
+
+    const tabConfig = {
+        'Script': ['Editor', 'Revisions', 'Notes'],
+        'Breakdown': ['Scene List', 'Schedule', 'Budget'],
+        'Entities': ['Locations', 'Props', 'Wardrobe', 'Cast'],
+        'Beats & Structure': ['Timeline', 'Beats', 'Pacing'],
+        'Visuals': ['Storyboards', 'Shot Composer', 'Color Script', 'Look Dev'],
+        'Production': ['Shot List', 'Call Sheets', 'Reports']
+    };
+
+    let currentLeftTab = 'Entities';
+    let currentTopTab = 'Locations';
+
+    const sampleScreenplay = `FADE IN:
+
+INT. APARTMENT - NIGHT
+
+MIRA paces, clutching a chipped COFFEE MUG. Rain drums against the window.
+
+MIRA
+(whispering)
+It wasn't supposed to end like this.
+
+A broken LAPTOP flickers on the desk. She opens an ENVELOPE WITH CASH. The bills are crisp.
+
+DETECTIVE HAYES enters, soaking wet.
+
+DETECTIVE HAYES
+You shouldn't be here.
+
+MIRA pulls a VINTAGE REVOLVER from the drawer. Her hand shakes.
+
+CUT TO:
+
+EXT. ALLEY - RAIN
+
+MIRA runs. Neon reflects in puddles. She drops the ENVELOPE WITH CASH.
+
+DETECTIVE HAYES
+Stop!
+
+They struggle. The REVOLVER slides across wet concrete.
+
+INT. WAREHOUSE - DAY
+
+Dust motes. MIRA sits alone, the COFFEE MUG now empty. The LAPTOP is closed.
+
+MIRA
+(V.O.)
+Some nights don't end. They just... pause.
+`;
+
+    function init() {
+        document.getElementById('script-editor').value = sampleScreenplay;
+        updateLineNumbers();
+        state.script = sampleScreenplay;
+        parseScript(true);
+        renderProps();
+        renderWardrobe();
+        renderSceneTable();
+        renderStoryboard();
+        populateStoryboardFilter();
+        setupEventListeners();
+        renderTopTabs(currentLeftTab);
+        switchLeftTab('Entities');
+    }
+
+    function hash(str){ let h=0; for(let i=0;i<str.length;i++){h=((h<<5)-h)+str.charCodeAt(i);h|=0} return h.toString(16); }
+
+    function parseScript(initial=false) {
+        const text = document.getElementById('script-editor').value;
+        state.script = text;
+
+        const sceneRegex = /^(INT\.|EXT\.|INT\/EXT\.)\s+([^\n-]+?)(?:\s*-\s*(DAY|NIGHT|DUSK|DAWN|RAIN))?$/gm;
+        const scenes = [];
+        let match, idx=1;
+        while ((match = sceneRegex.exec(text))) {
+            scenes.push({
+                id: idx,
+                type: match[1],
+                location: match[2].trim(),
+                time: match[3]||'',
+                full: match[0].trim()
+            });
+            idx++;
+        }
+
+        // Characters: uppercase lines
+        const charSet = new Set();
+        const lines = text.split('\n');
+        lines.forEach(l=>{
+            const t=l.trim();
+            if(/^[A-Z][A-Z\s'\-]{2,20}$/.test(t) && !/^(INT|EXT|CUT TO|FADE IN|FADE OUT)/.test(t)){
+                charSet.add(t.replace(/\(.*\)/, '').trim());
+            }
+        });
+        const characters = Array.from(charSet);
+
+        // Locations from scenes
+        const locations = [...new Set(scenes.map(s=>`${s.type} ${s.location} - ${s.time}`.trim()))];
+
+        // Props keywords
+        const propKeywords = ['VINTAGE REVOLVER','REVOLVER','BROKEN LAPTOP','LAPTOP','ENVELOPE WITH CASH','ENVELOPE','COFFEE MUG','MUG'];
+        const props = propKeywords.filter(k=> text.toUpperCase().includes(k));
+
+        state.parsed = { scenes, characters, locations, props };
+        state.lastSyncHash = hash(text);
+
+        updateOutline();
+        updateStats();
+        document.getElementById('last-sync').textContent = new Date().toLocaleTimeString();
+        document.getElementById('diff-banner').classList.add('hidden');
+
+        if (!initial) {
+            // rebuild dependent data
+            buildStoryboard();
+            renderSceneTable();
+            populateStoryboardFilter();
+        }
+    }
+
+    function updateLineNumbers() {
+        const ta = document.getElementById('script-editor');
+        const lines = ta.value.split('\n').length;
+        const nums = Array.from({length: lines}, (_,i)=>i+1).join('\n');
+        document.getElementById('line-numbers').textContent = nums;
+    }
+
+    function updateOutline() {
+        const c = state.parsed;
+        const container = document.getElementById('outline-lists');
+        container.innerHTML = `
+            <div>
+                <div class="flex items-center justify-between mb-2"><h4 class="text-sm font-semibold text-slate-200">Scenes</h4><span class="text-xs px-2 py-0.5 bg-slate-700 rounded-full">${c.scenes.length}</span></div>
+                <ul class="space-y-1 text-xs text-slate-400 max-h-32 overflow-auto scrollbar-thin pr-2">
+                    ${c.scenes.map(s=>`<li class="flex items-center gap-2"><i class="fas fa-film text-slate-600"></i>${s.full}</li>`).join('')}
+                </ul>
+            </div>
+            <div>
+                <div class="flex items-center justify-between mb-2"><h4 class="text-sm font-semibold text-slate-200">Characters</h4><span class="text-xs px-2 py-0.5 bg-slate-700 rounded-full">${c.characters.length}</span></div>
+                <div class="flex flex-wrap gap-1.5">
+                    ${c.characters.map(ch=>`<span class="px-2 py-0.5 bg-blue-500/15 text-blue-300 rounded text-[11px]">${ch}</span>`).join('')}
+                </div>
+            <div>
+                <div class="flex items-center justify-between mb-2"><h4 class="text-sm font-semibold text-slate-200">Locations</h4><span class="text-xs px-2 py-0.5 bg-slate-700 rounded-full">${c.locations.length}</span></div>
+                <ul class="space-y-1 text-xs text-slate-400">
+                    ${c.locations.map(l=>`<li class="flex items-center gap-2"><i class="fas fa-location-dot text-slate-600"></i>${l}</li>`).join('')}
+                </ul>
+            </div>
+            <div>
+                <div class="flex items-center justify-between mb-2"><h4 class="text-sm font-semibold text-slate-200">Props</h4><span class="text-xs px-2 py-0.5 bg-slate-700 rounded-full">${c.props.length}</span></div>
+                <div class="flex flex-wrap gap-1.5">
+                    ${c.props.map(p=>`<span class="px-2 py-0.5 bg-amber-500/15 text-amber-300 rounded text-[11px]">${p}</span>`).join('')}
+                </div>
+            </div>
+        `;
+    }
+
+    function updateStats() {
+        document.getElementById('stat-scenes').textContent = state.parsed.scenes.length;
+        document.getElementById('stat-characters').textContent = state.parsed.characters.length;
+        document.getElementById('stat-pages').textContent = Math.max(1, Math.round(state.script.length/1800));
+    }
+
+    function buildStoryboard() {
+        const shots = [];
+        state.parsed.scenes.forEach(scene=>{
+            const shotCount = scene.id===1?4:3;
+            const chars = scene.id===1?['MIRA','DETECTIVE HAYES']: scene.id===2?['MIRA','DETECTIVE HAYES']:['MIRA'];
+            const location = state.parsed.locations.find(l=>l.includes(scene.location)) || scene.full;
+            const statuses = ['Draft','Approved','Needs Backdrop'];
+            for(let i=0;i<shotCount;i++){
+                const label = `${scene.id}${String.fromCharCode(65+i)}`;
+                shots.push({
+                    id: label,
+                    sceneId: scene.id,
+                    label,
+                    location,
+                    characters: chars,
+                    status: statuses[i%3],
+                    shotType: ['Wide Shot','Medium Shot','Close-up','Extreme Close-up'][i%4],
+                    angle: ['Eye Level','High Angle','Low Angle'][i%3],
+                    movement: ['Static','Dolly','Pan'][i%3],
+                    fov: [24,35,50,85][i%4],
+                    lighting: location.includes('APARTMENT')?'Low Key': location.includes('ALLEY')?'Natural':'3-Point'
+                });
+            }
+        });
+        state.storyboard = shots;
+    }
+
+    function renderProps() {
+        state.propsData = [
+            { name:'Vintage Revolver', status:'acquired', icon:'fa-gun', scenes:'3,7,12,19', note:'6 rounds loaded, safety off', locked:true },
+            { name:'Broken Laptop', status:'onset', icon:'fa-laptop-code', scenes:'1,5,8', note:'Screen flickers when opened', locked:false },
+            { name:'Envelope with Cash', status:'needed', icon:'fa-envelope-open-dollar', scenes:'9,14', note:'Prop money verified', locked:false },
+            { name:'Coffee Mug - Chipped', status:'acquired', icon:'fa-mug-hot', scenes:'1,3,7,15', note:'Always 1/3 full, cold', locked:true }
+        ];
+        const grid = document.getElementById('props-grid');
+        grid.innerHTML = state.propsData.map(p=>`
+            <div class="prop-card glass rounded-xl overflow-hidden card-hover" data-status="${p.status}" data-name="${p.name}">
+                <div class="relative aspect-square bg-gradient-to-br from-slate-800 to-slate-900 p-4">
+                    <div class="w-full h-full bg-slate-700/50 rounded-lg flex items-center justify-center">
+                        <i class="fas ${p.icon} text-4xl text-slate-500"></i>
+                    </div>
+                    <div class="absolute top-3 right-3"><span class="px-2 py-1 ${p.status==='acquired'?'bg-green-500/20 text-green-400':p.status==='onset'?'bg-blue-500/20 text-blue-400':'bg-yellow-500/20 text-yellow-400'} rounded text-xs font-medium capitalize">${p.status}</span></div>
+                </div>
+                <div class="p-4">
+                    <h3 class="font-semibold mb-1">${p.name}</h3>
+                    <p class="text-xs text-slate-400 mb-3">${p.note}</p>
+                    <div class="text-xs text-slate-400 flex items-center gap-2 mb-3"><i class="fas fa-film w-4"></i>Scenes: ${p.scenes}</div>
+                    <div class="flex items-center justify-between pt-3 border-t border-slate-700">
+                        <span class="text-xs text-slate-400">Lock Prop</span>
+                        <label class="toggle-switch"><input type="checkbox" ${p.locked?'checked':''}><span class="toggle-slider"></span></label>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function renderWardrobe() {
+        state.wardrobe = [
+            { character:'MIRA', avatar:'https://i.pravatar.cc/48?img=5', looks:[
+                {name:'Casual Night', scenes:'1,3,7', mood:['Anxious','Vulnerable'], items:{Top:'Hoodie',Bottom:'Jeans',Shoes:'Boots',Accessory:'Watch'}, lock:75, status:'ok'},
+                {name:'Confrontation', scenes:'12,15,18', mood:['Defiant','Alert'], items:{Top:'Jacket',Bottom:'Pants',Shoes:'Sneakers',Accessory:'Scarf'}, lock:70, status:'warn'}
+            ]},
+            { character:'DETECTIVE HAYES', avatar:'https://i.pravatar.cc/48?img=12', looks:[
+                {name:'Detective Standard', scenes:'2,5,9,14,19', mood:['Professional','Tired'], items:{Top:'Suit',Bottom:'Slacks',Shoes:'Dress',Accessory:'Badge'}, lock:80, status:'ok'}
+            ]}
+        ];
+        const list = document.getElementById('wardrobe-list');
+        list.innerHTML = state.wardrobe.map(c=>`
+            <div class="glass rounded-xl overflow-hidden">
+                <div class="p-5 border-b border-slate-700 bg-slate-800/50 flex items-center gap-3">
+                    <img src="${c.avatar}" class="w-12 h-12 rounded-full border-2 border-blue-500">
+                    <div><h3 class="font-display font-semibold text-lg">${c.character}</h3><p class="text-xs text-slate-400">${c.looks.length} looks defined</p></div>
+                </div>
+                <div class="p-5 grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    ${c.looks.map(l=>`
+                        <div class="bg-slate-900/50 rounded-lg border border-slate-700 p-4 relative">
+                            <div class="flex items-start justify-between mb-3">
+                                <div>
+                                    <h4 class="font-semibold mb-1">${l.name}</h4>
+                                    <div class="flex gap-1">${l.mood.map(m=>`<span class="px-2 py-0.5 bg-slate-700 text-slate-300 rounded text-xs">${m}</span>`).join('')}</div>
+                                </div>
+                                <button class="text-slate-400"><i class="fas fa-unlock"></i></button>
+                            </div>
+                            <div class="text-xs text-slate-500 mb-2">Scenes: ${l.scenes}</div>
+                            <div class="grid grid-cols-4 gap-2 mb-3">
+                                ${Object.entries(l.items).map(([k,v])=>`
+                                    <div class="bg-slate-800 rounded p-2 text-center">
+                                        <div class="text-[10px] text-slate-500 mb-1">${k}</div>
+                                        <div class="text-xs text-slate-300">${v}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            <div class="pt-3 border-t border-slate-700">
+                                <div class="flex items-center justify-between text-xs mb-1"><span class="text-slate-400">Lock Strength</span><span>${l.lock}%</span></div>
+                                <input type="range" min="70" max="85" value="${l.lock}" class="slider w-full h-1 bg-slate-700">
+                            </div>
+                            <div class="mt-3 px-3 py-2 ${l.status==='ok'?'bg-green-500/10 border-green-500/30 text-green-400':'bg-amber-500/10 border-amber-500/30 text-amber-400'} border rounded-lg text-xs">
+                                <i class="fas ${l.status==='ok'?'fa-check-circle':'fa-exclamation-triangle'} mr-1"></i>
+                                ${l.status==='ok'?'Continuity OK':'Warning: accessory appears late'}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function renderSceneTable() {
+        const tbl = document.getElementById('scene-table');
+        if(!tbl) return;
+        tbl.innerHTML = state.parsed.scenes.map(s=>`
+            <div class="py-3 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center font-display font-bold">${s.id}</div>
+                    <div>
+                        <div class="font-medium">${s.full}</div>
+                        <div class="text-xs text-slate-500">${Math.floor(Math.random()*5+1)} shots • ${Math.floor(Math.random()*2+1)} pages</div>
+                    </div>
+                <div class="flex items-center gap-2">
+                    <span class="px-2 py-1 bg-slate-700 rounded text-xs">${s.time||'DAY'}</span>
+                    <button class="px-2 py-1 bg-slate-700 hover:bg-slate-600 rounded text-xs">Open Board</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function renderStoryboard() {
+        if(state.storyboard.length===0) buildStoryboard();
+        const groups = document.getElementById('storyboard-groups');
+        const filter = document.getElementById('storyboard-filter')?.value || 'all';
+        const byScene = {};
+        state.storyboard.forEach(s=>{
+            if(filter!=='all' && !s.location.includes(filter)) return;
+            (byScene[s.sceneId] ||= []).push(s);
+        });
+        groups.innerHTML = Object.entries(byScene).map(([sceneId, shots])=>{
+            const scene = state.parsed.scenes.find(s=>s.id==sceneId);
+            return `
+                <div>
+                    <div class="flex items-center gap-3 mb-3">
+                        <h3 class="font-display font-semibold text-lg">Scene ${sceneId} • ${scene?scene.full:'--'}</h3>
+                        <span class="px-2 py-0.5 bg-slate-700 rounded-full text-xs">${shots.length} shots</span>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+                        ${shots.map(sh=>`
+                            <button data-shot-id="${sh.id}" class="storyboard-frame group glass rounded-xl overflow-hidden text-left hover:border-blue-500 border border-slate-700 transition-all">
+                                <div class="aspect-video backdrop-placeholder relative">
+                                    <div class="absolute inset-0 flex items-center justify-center">
+                                        <i class="fas fa-image text-3xl text-slate-600 group-hover:text-slate-500"></i>
+                                    </div>
+                                    <div class="absolute top-2 left-2 px-2 py-0.5 bg-black/70 rounded text-[10px] font-mono">${sh.label}</div>
+                                    <div class="absolute top-2 right-2 px-2 py-0.5 rounded text-[10px] font-medium ${
+                                        sh.status==='Approved'?'bg-emerald-500/20 text-emerald-300':
+                                        sh.status==='Needs Backdrop'?'bg-amber-500/20 text-amber-300':
+                                        'bg-slate-700/80 text-slate-300'
+                                    }">${sh.status}</div>
+                                </div>
+                                <div class="p-3">
+                                    <div class="flex items-center justify-between mb-1">
+                                        <span class="text-xs text-slate-400 truncate">${sh.location.split(' - ')[0]}</span>
+                                        <span class="text-[10px] px-1.5 py-0.5 bg-slate-800 rounded">${sh.shotType.split(' ')[0]}</span>
+                                    </div>
+                                    <div class="flex flex-wrap gap-1">
+                                        ${sh.characters.map(c=>`<span class="px-1.5 py-0.5 bg-blue-500/15 text-blue-300 rounded text-[10px]">${c}</span>`).join('')}
+                                    </div>
+                                </div>
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        // click handlers
+        groups.querySelectorAll('.storyboard-frame').forEach(btn=>{
+            btn.addEventListener('click', ()=>{
+                openShotComposer(btn.dataset.shotId);
+            });
+        });
+    }
+
+    function populateStoryboardFilter() {
+        const sel = document.getElementById('storyboard-filter');
+        if(!sel) return;
+        const locs = [...new Set(state.storyboard.map(s=>s.location.split(' - ')[0]))];
+        sel.innerHTML = `<option value="all">All Locations</option>` + locs.map(l=>`<option>${l}</option>`).join('');
+    }
+
+    function openShotComposer(shotId) {
+        switchLeftTab('Visuals');
+        switchTopTab('shot-composer');
+        loadShot(shotId);
+    }
+
+    function loadShot(shotId) {
+        const shot = state.storyboard.find(s=>s.id===shotId);
+        if(!shot) return;
+        state.currentShotId = shotId;
+
+        // navigator
+        const nav = document.getElementById('shot-navigator');
+        const sceneShots = state.storyboard.filter(s=>s.sceneId===shot.sceneId);
+        nav.innerHTML = sceneShots.map(s=>`
+            <button data-shot-id="${s.id}" class="shot-pill px-3 py-1.5 rounded-full text-xs font-medium bg-slate-800 text-slate-300 ${s.id===shotId?'active':''}">
+                ${s.label}
+            </button>
+        `).join('');
+        nav.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>loadShot(b.dataset.shotId)));
+
+        // inspector
+        document.getElementById('ins-scene').textContent = shot.sceneId;
+        document.getElementById('ins-shot').textContent = shot.label;
+        document.getElementById('ins-location').textContent = shot.location;
+        document.getElementById('ins-characters').textContent = shot.characters.join(', ');
+        document.getElementById('ins-status').textContent = shot.status;
+        document.getElementById('composer-shot-label').textContent = shot.label;
+        document.getElementById('composer-location-tag').textContent = shot.location;
+
+        // controls
+        document.getElementById('composer-shot-type').value = shot.shotType;
+        document.getElementById('composer-angle').value = shot.angle;
+        document.getElementById('composer-movement').value = shot.movement;
+        document.getElementById('composer-fov').value = shot.fov;
+        document.getElementById('composer-fov-val').textContent = shot.fov+'mm';
+        document.getElementById('composer-lighting').value = shot.lighting;
+
+        // char locks
+        const charLocks = document.getElementById('composer-char-locks');
+        charLocks.innerHTML = shot.characters.map(ch=>{
+            const ward = state.wardrobe.find(w=>w.character===ch);
+            const look = ward?.looks[0];
+            return `
+                <div class="bg-slate-800/60 rounded-lg p-3">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center gap-2">
+                            <img src="${ward?.avatar||''}" class="w-6 h-6 rounded-full">
+                            <span class="text-sm font-medium">${ch}</span>
+                        </div>
+                        <label class="toggle-switch scale-75"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+                    </div>
+                    <div class="text-[11px] text-slate-400 mb-2">Look: ${look?.name||'Default'}</div>
+                    <input type="range" min="70" max="85" value="${look?.lock||75}" class="slider w-full h-1 bg-slate-700">
+                </div>
+            `;
+        }).join('');
+
+        // props checklist
+        const propBox = document.getElementById('composer-props');
+        const relevantProps = state.propsData.slice(0,3);
+        propBox.innerHTML = relevantProps.map(p=>`
+            <label class="flex items-center gap-2 bg-slate-800/50 rounded px-2 py-1.5">
+                <input type="checkbox" class="accent-blue-500" ${p.locked?'checked':''}>
+                <span>${p.name}</span>
+                <span class="ml-auto text-[10px] px-1.5 py-0.5 rounded bg-slate-700 text-slate-300">${p.status}</span>
+            </label>
+        `).join('');
+
+        updatePromptPreview();
+    }
+
+    function updatePromptPreview() {
+        const shot = state.storyboard.find(s=>s.id===state.currentShotId);
+        if(!shot) return;
+        const prompt = `${shot.shotType} of ${shot.characters.join(' & ')}, ${shot.angle.toLowerCase()}, ${shot.lighting.toLowerCase()} lighting, ${shot.fov}mm lens, ${shot.movement.toLowerCase()} camera. Location: ${shot.location}. Mood: tense, cinematic, film grain.`;
+        document.getElementById('prompt-preview').textContent = prompt;
+    }
+
+    function renderTopTabs(leftTab) {
+        const container = document.getElementById('top-tabs');
+        const tabs = tabConfig[leftTab] || [];
+        container.innerHTML = '';
+        tabs.forEach((tab,i)=>{
+            const btn = document.createElement('button');
+            btn.className = `px-4 py-2 text-sm font-medium transition-all border-b-2 border-transparent hover:text-white ${i===0?'top-tab-active':'text-slate-400'}`;
+            btn.textContent = tab;
+            btn.dataset.topTab = tab.toLowerCase().replace(/\s+/g,'-');
+            btn.addEventListener('click', ()=> switchTopTab(btn.dataset.topTab));
+            container.appendChild(btn);
+        });
+        if(tabs.length) {
+            currentTopTab = tabs[0].toLowerCase().replace(/\s+/g,'-');
+            showSubPanel(currentTopTab);
+        }
+    }
+
+    function switchLeftTab(tabName) {
+        currentLeftTab = tabName;
+        document.querySelectorAll('.left-tab').forEach(btn=>{
+            btn.classList.remove('tab-active');
+            btn.classList.add('text-slate-300');
+        });
+        const active = document.querySelector(`[data-left-tab="${tabName}"]`);
+        if(active){ active.classList.add('tab-active'); active.classList.remove('text-slate-300'); }
+        document.querySelectorAll('.content-panel').forEach(p=>p.classList.add('hidden'));
+        const id = tabName.toLowerCase().replace(/ & /g,'-').replace(/\s+/g,'-') + '-content';
+        document.getElementById(id)?.classList.remove('hidden');
+        renderTopTabs(tabName);
+    }
+
+    function switchTopTab(tabName) {
+        currentTopTab = tabName;
+        document.querySelectorAll('#top-tabs button').forEach(btn=>{
+            btn.classList.remove('top-tab-active');
+            btn.classList.add('text-slate-400');
+        });
+        document.querySelector(`[data-top-tab="${tabName}"]`)?.classList.add('top-tab-active');
+        document.querySelector(`[data-top-tab="${tabName}"]`)?.classList.remove('text-slate-400');
+        showSubPanel(tabName);
+    }
+
+    function showSubPanel(name) {
+        document.querySelectorAll('.sub-panel').forEach(p=>p.classList.add('hidden'));
+        document.getElementById(`${name}-panel`)?.classList.remove('hidden');
+    }
+
+    function setupEventListeners() {
+        document.querySelectorAll('.left-tab').forEach(btn=>btn.addEventListener('click',()=>switchLeftTab(btn.dataset.leftTab)));
+
+        const editor = document.getElementById('script-editor');
+        editor.addEventListener('input', ()=>{
+            updateLineNumbers();
+            const newHash = hash(editor.value);
+            if(newHash !== state.lastSyncHash) {
+                document.getElementById('diff-banner').classList.remove('hidden');
+            }
+        });
+
+        document.getElementById('parse-sync-btn').addEventListener('click', ()=> parseScript());
+        document.getElementById('reparse-btn').addEventListener('click', ()=> parseScript());
+
+        // Props filter
+        const propSearch = document.getElementById('prop-search');
+        const propFilter = document.getElementById('prop-filter');
+        if(propSearch) propSearch.addEventListener('input', filterProps);
+        if(propFilter) propFilter.addEventListener('change', filterProps);
+
+        // Generate backdrop
+        document.querySelectorAll('.generate-backdrop').forEach(btn=>{
+            btn.addEventListener('click', function(){
+                const orig = this.innerHTML;
+                this.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Generating...';
+                this.disabled = true;
+                setTimeout(()=>{
+                    this.innerHTML = '<i class="fas fa-check mr-2"></i>Generated!';
+                    setTimeout(()=>{ this.innerHTML = orig; this.disabled=false; },1500);
+                },1800);
+            });
+        });
+
+        // Storyboard filter
+        document.getElementById('storyboard-filter')?.addEventListener('change', renderStoryboard);
+
+        // Shot composer generate
+        document.getElementById('generate-frame-btn')?.addEventListener('click', function(){
+            const icon = document.getElementById('composer-preview-icon');
+            const label = document.getElementById('composer-preview-label');
+            this.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Generating frame...';
+            this.disabled = true;
+            icon.innerHTML = '<i class="fas fa-spinner fa-spin text-2xl text-blue-400"></i>';
+            label.textContent = 'Composing with entity locks...';
+            setTimeout(()=>{
+                icon.innerHTML = '<i class="fas fa-image text-2xl text-emerald-400"></i>';
+                label.textContent = 'Frame generated • Locked to wardrobe & props';
+                this.innerHTML = '<i class="fas fa-check mr-2"></i>Regenerate Frame';
+                this.disabled = false;
+                // update shot status
+                const shot = state.storyboard.find(s=>s.id===state.currentShotId);
+                if(shot) shot.status = 'Approved';
+                renderStoryboard();
+                document.getElementById('ins-status').textContent = 'Approved';
+                document.getElementById('ins-status').className = 'text-emerald-400';
+            },2200);
+        });
+
+        // Composer controls update prompt
+        ['composer-shot-type','composer-angle','composer-movement','composer-lighting'].forEach(id=>{
+            document.getElementById(id)?.addEventListener('change', updatePromptPreview);
+        });
+        document.getElementById('composer-fov')?.addEventListener('input', e=>{
+            document.getElementById('composer-fov-val').textContent = e.target.value+'mm';
+            updatePromptPreview();
+        });
+
+        // Back to storyboard
+        document.getElementById('open-in-storyboard')?.addEventListener('click', ()=>{
+            switchTopTab('storyboards');
+        });
+
+        // Location cards -> highlight storyboard
+        document.querySelectorAll('.location-card').forEach(card=>{
+            card.addEventListener('click', ()=>{
+                const loc = card.dataset.location;
+                switchLeftTab('Visuals');
+                switchTopTab('storyboards');
+                const sel = document.getElementById('storyboard-filter');
+                if(sel){
+                    const opt = Array.from(sel.options).find(o=>loc.includes(o.value));
+                    if(opt) sel.value = opt.value;
+                    renderStoryboard();
+                }
+            });
+        });
+
+        // Camera dragging
+        document.querySelectorAll('.camera-marker').forEach(marker=>{
+            let dragging=false, sx, sy, sl, st;
+            marker.addEventListener('mousedown', e=>{
+                dragging=true; marker.classList.add('dragging');
+                sx=e.clientX; sy=e.clientY;
+                sl=marker.offsetLeft; st=marker.offsetTop;
+                e.preventDefault();
+            });
+            document.addEventListener('mousemove', e=>{
+                if(!dragging) return;
+                marker.style.left = `${sl + e.clientX - sx}px`;
+                marker.style.top = `${st + e.clientY - sy}px`;
+            });
+            document.addEventListener('mouseup', ()=>{ dragging=false; marker.classList.remove('dragging'); });
+        });
+    }
+
+    function filterProps() {
+        const term = document.getElementById('prop-search').value.toLowerCase();
+        const status = document.getElementById('prop-filter').value;
+        document.querySelectorAll('.prop-card').forEach(card=>{
+            const name = card.dataset.name.toLowerCase();
+            const st = card.dataset.status;
+            const ok = name.includes(term) && (status==='all' || st===status);
+            card.style.display = ok?'' : 'none';
+        });
+    }
+
+    return { init };
+})();
+
+document.addEventListener('DOMContentLoaded', CineGen.init);
+</script>
+<script>(function(){document.addEventListener("click",function(e){var a=e.target.closest("[data-product-id]");if(!a)return;e.preventDefault();var pid=a.getAttribute("data-product-id");if(pid)parent.postMessage({type:"ecto-artifact-link-click",productId:pid},"*")})})();</script>
+</body>
+</html>

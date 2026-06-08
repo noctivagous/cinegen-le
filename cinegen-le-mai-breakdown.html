@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CineGen • Unified Pre-Production Hub</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --bg-primary: #0f172a;
+        --bg-secondary: #1e293b;
+        --bg-tertiary: #334155;
+        --accent: #3b82f6;
+        --accent-hover: #2563eb;
+        --text-primary: #f1f5f9;
+        --text-secondary: #cbd5e1;
+        --text-muted: #64748b;
+        --border: #334155;
+    }
+    * { box-sizing: border-box; }
+    html { scrollbar-width: thin; scrollbar-color: #3b82f6 #1e293b; }
+    ::-webkit-scrollbar { width:8px; height:8px; }
+    ::-webkit-scrollbar-track { background:#1e293b; }
+    ::-webkit-scrollbar-thumb { background:#3b82f6cc; border-radius:4px; }
+    body {
+        font-family: 'Inter', sans-serif;
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        overflow-x: hidden;
+    }
+    .font-display { font-family: 'Space Grotesk', sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    .glass {
+        background: rgba(30, 41, 59, 0.6);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(51, 65, 85, 0.5);
+    }
+    .card-hover { transition: all 0.25s cubic-bezier(0.4,0,0.2,1); }
+    .card-hover:hover { transform: translateY(-2px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); border-color: var(--accent); }
+    .tab-active {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(59,130,246,0.4);
+    }
+    .top-tab-active { border-bottom:2px solid var(--accent); color:var(--accent); }
+    .breakdown-tab-active { background:rgba(59,130,246,0.15); color:#60a5fa; border-color:#3b82f6; }
+    .floorplan-grid {
+        background-image: linear-gradient(rgba(59,130,246,0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(59,130,246,0.15) 1px, transparent 1px);
+        background-size:20px 20px;
+    }
+    .camera-marker { cursor: move; transition: all 0.2s ease; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }
+    .camera-marker:hover { transform:scale(1.15); }
+    .slider::-webkit-slider-thumb { appearance:none; width:16px; height:16px; border-radius:50%; background:var(--accent); cursor:pointer; box-shadow:0 2px 4px rgba(0,0,0,0.3); }
+    .slider::-moz-range-thumb { width:16px; height:16px; border-radius:50%; background:var(--accent); cursor:pointer; border:none; }
+    .toggle-switch { position:relative; width:44px; height:24px; }
+    .toggle-switch input { opacity:0; width:0; height:0; }
+    .toggle-slider { position:absolute; cursor:pointer; inset:0; background-color:var(--bg-tertiary); transition:0.3s; border-radius:24px; }
+    .toggle-slider:before { position:absolute; content:""; height:18px; width:18px; left:3px; bottom:3px; background:white; transition:0.3s; border-radius:50%; }
+    input:checked + .toggle-slider { background-color:var(--accent); }
+    input:checked + .toggle-slider:before { transform:translateX(20px); }
+    .backdrop-placeholder { background:linear-gradient(135deg,#1e293b 0%,#334155 100%); position:relative; overflow:hidden; }
+    .backdrop-placeholder::before { content:''; position:absolute; top:-50%; left:-50%; width:200%; height:200%; background:linear-gradient(45deg,transparent,rgba(59,130,246,0.08),transparent); animation:shimmer 3s infinite; }
+    @keyframes shimmer { 0%{transform:translateX(-100%) translateY(-100%) rotate(45deg);} 100%{transform:translateX(100%) translateY(100%) rotate(45deg);} }
+    .editor-wrap { background:#0b1220; border:1px solid #1f2a44; border-radius:0.75rem; overflow:hidden; }
+    .editor-toolbar { background:#0f172a; border-bottom:1px solid #1f2a44; }
+    .editor-textarea { background:transparent; color:#e2e8f0; font-family:'JetBrains Mono', monospace; font-size:13.5px; line-height:1.7; tab-size:4; resize:none; }
+    .editor-textarea:focus { outline:none; }
+    .line-numbers { font-family:'JetBrains Mono', monospace; font-size:13.5px; line-height:1.7; color:#475569; user-select:none; text-align:right; padding-right:1rem; }
+    .diff-banner { background:linear-gradient(90deg,rgba(245,158,11,0.15),rgba(245,158,11,0)); border:1px solid rgba(245,158,11,0.4); }
+    .shot-pill { transition:all 0.2s; }
+    .shot-pill.active { background:#3b82f6; color:white; box-shadow:0 0 0 2px rgba(59,130,246,0.3); }
+    .shot-pill:hover { background:#334155; }
+    .frame-canvas { background:radial-gradient(ellipse at center,#1e293b 0%,#0f172a 100%); aspect-ratio:16/9; }
+    .guide-grid { background-image:linear-gradient(rgba(255,255,255,0.08)1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.08)1px,transparent 1px); background-size:33.33% 33.33%; }
+    .storyboard-frame.selected { outline:2px solid #3b82f6; box-shadow:0 0 0 4px rgba(59,130,246,0.2); }
+    .chip { background:rgba(59,130,246,0.12); border:1px solid rgba(59,130,246,0.35); }
+    .ready-dot { box-shadow:0 0 0 3px rgba(34,197,94,0.15); }
+    .warn-dot { box-shadow:0 0 0 3px rgba(234,179,8,0.15); }
+    .danger-dot { box-shadow:0 0 0 3px rgba(239,68,68,0.15); }
+    @keyframes slideIn { from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+    .slide-in { animation:slideIn .3s ease; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .spin { animation:spin 1s linear infinite; }
+    .scrollbar-thin::-webkit-scrollbar{width:6px;height:6px;}
+    .scrollbar-thin::-webkit-scrollbar-track{background:var(--bg-secondary);}
+    .scrollbar-thin::-webkit-scrollbar-thumb{background:var(--bg-tertiary);border-radius:3px;}
+    @media (max-width:1024px){ .mobile-hide{display:none;} }
+</style>
+</head>
+<body class="antialiased">
+<div class="flex h-screen overflow-hidden">
+    <!-- LEFT VERTICAL NAV -->
+    <aside class="w-16 lg:w-64 bg-[#1e293b] border-r border-slate-700 flex flex-col shrink-0">
+        <div class="p-4 border-b border-slate-700 flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center shadow-lg shadow-blue-500/25">
+                <i class="fas fa-film text-white text-sm"></i>
+            </div>
+            <div class="mobile-hide">
+                <div class="font-display font-bold text-lg leading-none">CineGen</div>
+                <div class="text-[10px] uppercase tracking-widest text-slate-400">Production Hub</div>
+            </div>
+        </div>
+        <nav class="flex-1 p-2 space-y-1 overflow-y-auto scrollbar-thin">
+            <button data-left-tab="Script" class="left-tab w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all hover:bg-slate-700/50 text-slate-300">
+                <i class="fas fa-scroll w-5 text-center"></i><span class="mobile-hide font-medium">Script</span>
+            </button>
+            <button data-left-tab="Breakdown" class="left-tab tab-active w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all text-white">
+                <i class="fas fa-chart-pie w-5 text-center"></i><span class="mobile-hide font-medium">Breakdown</span>
+            </button>
+            <button data-left-tab="Entities" class="left-tab w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all hover:bg-slate-700/50 text-slate-300">
+                <i class="fas fa-cube w-5 text-center"></i><span class="mobile-hide font-medium">Entities</span>
+            </button>
+            <button data-left-tab="Beats & Structure" class="left-tab w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all hover:bg-slate-700/50 text-slate-300">
+                <i class="fas fa-chart-line w-5 text-center"></i><span class="mobile-hide font-medium">Beats</span>
+            </button>
+            <button data-left-tab="Visuals" class="left-tab w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all hover:bg-slate-700/50 text-slate-300">
+                <i class="fas fa-palette w-5 text-center"></i><span class="mobile-hide font-medium">Visuals</span>
+            </button>
+            <button data-left-tab="Production" class="left-tab w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all hover:bg-slate-700/50 text-slate-300">
+                <i class="fas fa-clapperboard w-5 text-center"></i><span class="mobile-hide font-medium">Production</span>
+            </button>
+        </nav>
+        <div class="p-3 border-t border-slate-700 mobile-hide">
+            <div class="flex items-center gap-3 px-2 py-2 rounded-xl bg-slate-800/60">
+                <img src="https://i.pravatar.cc/40?img=8" class="w-9 h-9 rounded-lg">
+                <div class="min-w-0"><p class="text-sm font-medium truncate">Alex Chen</p><p class="text-xs text-slate-400">Director</p></div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- MAIN COLUMN -->
+    <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+        <!-- TOP BAR -->
+        <header class="bg-[#1e293b] border-b border-slate-700">
+            <div class="flex items-center justify-between px-4 lg:px-6 py-3 gap-4">
+                <div id="top-tabs" class="flex items-center gap-1 overflow-x-auto scrollbar-thin"></div>
+                <div class="flex items-center gap-2 shrink-0">
+                    <button id="global-render" class="px-3 py-2 bg-blue-600 hover:bg-blue-700 rounded-xl text-sm font-medium shadow-lg shadow-blue-600/25">
+                        <i class="fas fa-play mr-1.5"></i><span class="hidden sm:inline">Render Preview</span>
+                    </button>
+                    <button class="w-9 h-9 rounded-xl hover:bg-slate-700 grid place-items-center"><i class="fas fa-bell text-slate-400"></i></button>
+                </div>
+            </div>
+        </header>
+
+        <!-- CONTENT AREA -->
+        <main class="flex-1 overflow-hidden bg-[#0f172a]">
+            <!-- SCRIPT -->
+            <div id="script-content" class="content-panel hidden h-full overflow-y-auto p-6 scrollbar-thin">
+                <div id="diff-banner" class="diff-banner hidden mb-4 rounded-xl p-3 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <i class="fas fa-code-branch text-amber-400 text-lg"></i>
+                        <div>
+                            <p class="text-sm font-medium text-amber-300">Script changed since last sync</p>
+                            <p class="text-xs text-amber-200/80">Breakdown & boards may be out of date.</p>
+                        </div>
+                    </div>
+                    <button id="reparse-btn" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-slate-900 rounded-lg text-xs font-semibold">Parse & Sync</button>
+                </div>
+                <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                    <div class="xl:col-span-2 editor-wrap">
+                        <div class="editor-toolbar px-4 py-2.5 flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <span class="text-xs uppercase tracking-wider text-slate-400">MIDNIGHT_RUN_03.fdx</span>
+                                <span class="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 rounded-full text-[10px] font-medium">PARSED</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button class="w-8 h-8 rounded-lg hover:bg-slate-700 grid place-items-center text-slate-400"><i class="fas fa-search"></i></button>
+                                <button class="w-8 h-8 rounded-lg hover:bg-slate-700 grid place-items-center text-slate-400"><i class="fas fa-ellipsis"></i></button>
+                            </div>
+                        </div>
+                        <div class="flex">
+                            <div id="line-numbers" class="line-numbers pl-4 py-4 w-14 bg-[#0b1220] border-r border-slate-800">1</div>
+                            <textarea id="script-editor" class="editor-textarea flex-1 p-4 h-[680px] scrollbar-thin"></textarea>
+                        </div>
+                    </div>
+                    <div class="space-y-6">
+                        <div class="glass rounded-2xl p-5">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="font-display font-semibold">Parsed Outline</h3>
+                                <button id="parse-sync-btn" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 rounded-lg text-xs font-medium"><i class="fas fa-sync mr-1"></i>Parse & Sync</button>
+                            </div>
+                            <div id="outline-lists" class="space-y-4"></div>
+                            <div class="mt-4 pt-4 border-t border-slate-700 text-xs text-slate-400">Last sync: <span id="last-sync">just now</span></div>
+                        </div>
+                        <div class="glass rounded-2xl p-5">
+                            <h3 class="font-display font-semibold mb-3">Scene Navigator</h3>
+                            <div id="script-scene-nav" class="space-y-1.5 max-h-64 overflow-y-auto scrollbar-thin pr-2"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BREAKDOWN -->
+            <div id="breakdown-content" class="content-panel h-full overflow-hidden">
+                <div class="flex h-full">
+                    <!-- Scene Sidebar -->
+                    <aside class="w-[340px] border-r border-slate-800 bg-slate-900/60 flex flex-col shrink-0">
+                        <div class="p-4 border-b border-slate-800">
+                            <div class="flex items-center justify-between mb-3">
+                                <h2 class="text-sm font-semibold uppercase tracking-wider text-slate-400">Scenes</h2>
+                                <span class="text-xs mono text-slate-500" id="breakdown-scene-count">18 SCENES</span>
+                            </div>
+                            <div class="relative">
+                                <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
+                                <input id="breakdown-scene-search" placeholder="Filter scenes..." class="w-full pl-9 pr-3 py-2.5 rounded-xl bg-slate-800 border border-slate-700 focus:outline-none focus:border-blue-500 text-sm placeholder-slate-500"/>
+                            </div>
+                        </div>
+                        <div id="breakdown-scene-list" class="flex-1 overflow-y-auto p-2 space-y-1.5 scrollbar-thin"></div>
+                        <div class="p-3 border-t border-slate-800 bg-slate-900/80">
+                            <div class="flex items-center justify-between text-xs text-slate-400 mb-2"><span>Overall Readiness</span><span class="mono">76%</span></div>
+                            <div class="h-2 rounded-full bg-slate-800 overflow-hidden"><div class="h-full w-[76%] bg-gradient-to-r from-blue-500 to-indigo-500"></div></div>
+                        </div>
+                    </aside>
+                    <!-- Main Breakdown -->
+                    <section class="flex-1 flex flex-col min-w-0 bg-[#0b1222]">
+                        <div class="border-b border-slate-800 bg-slate-900/40 px-4 py-3 flex items-center gap-2 overflow-x-auto scrollbar-thin">
+                            <button data-bd-tab="overview" class="bd-tab breakdown-tab-active px-3.5 py-2 rounded-xl border text-sm font-medium whitespace-nowrap"><i class="fas fa-chart-pie mr-1.5"></i>Overview</button>
+                            <button data-bd-tab="characters" class="bd-tab px-3.5 py-2 rounded-xl border border-slate-700 hover:border-slate-600 text-sm whitespace-nowrap"><i class="fas fa-users mr-1.5"></i>Characters</button>
+                            <button data-bd-tab="locations" class="bd-tab px-3.5 py-2 rounded-xl border border-slate-700 hover:border-slate-600 text-sm whitespace-nowrap"><i class="fas fa-location-dot mr-1.5"></i>Locations</button>
+                            <button data-bd-tab="props" class="bd-tab px-3.5 py-2 rounded-xl border border-slate-700 hover:border-slate-600 text-sm whitespace-nowrap"><i class="fas fa-box-open mr-1.5"></i>Props</button>
+                            <button data-bd-tab="wardrobe" class="bd-tab px-3.5 py-2 rounded-xl border border-slate-700 hover:border-slate-600 text-sm whitespace-nowrap"><i class="fas fa-shirt mr-1.5"></i>Wardrobe</button>
+                            <button data-bd-tab="vfx" class="bd-tab px-3.5 py-2 rounded-xl border border-slate-700 hover:border-slate-600 text-sm whitespace-nowrap"><i class="fas fa-wand-magic-sparkles mr-1.5"></i>VFX</button>
+                            <button data-bd-tab="sfx" class="bd-tab px-3.5 py-2 rounded-xl border border-slate-700 hover:border-slate-600 text-sm whitespace-nowrap"><i class="fas fa-volume-high mr-1.5"></i>SFX</button>
+                            <div class="ml-auto flex items-center gap-2">
+                                <input id="bd-search" placeholder="Search..." class="hidden md:block w-48 pl-8 pr-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-sm placeholder-slate-500"/>
+                                <button id="bd-export" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-sm"><i class="fas fa-file-csv mr-1"></i>Export</button>
+                            </div>
+                        </div>
+                        <div id="breakdown-main" class="flex-1 overflow-y-auto p-6 scrollbar-thin"></div>
+                    </section>
+                </div>
+            </div>
+
+            <!-- ENTITIES -->
+            <div id="entities-content" class="content-panel hidden h-full overflow-y-auto p-6 scrollbar-thin">
+                <div id="locations-panel" class="sub-panel">
+                    <div class="mb-6 flex items-center justify-between">
+                        <div><h2 class="font-display text-2xl font-bold mb-1">Locations</h2><p class="text-slate-400 text-sm">Manage sets, camera blocking, and environment assets</p></div>
+                        <button class="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-xl text-sm font-medium"><i class="fas fa-plus mr-2"></i>Add Location</button>
+                    </div>
+                    <div class="grid grid-cols-1 xl:grid-cols-2 gap-6" id="locations-grid"></div>
+                </div>
+                <div id="props-panel" class="sub-panel hidden">
+                    <div class="mb-6 flex items-center justify-between">
+                        <div><h2 class="font-display text-2xl font-bold mb-1">Props</h2><p class="text-slate-400 text-sm">Track physical objects and continuity</p></div>
+                        <button class="px-4 py-2 bg-blue-600 rounded-xl text-sm"><i class="fas fa-plus mr-2"></i>Add Prop</button>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" id="props-grid"></div>
+                </div>
+                <div id="wardrobe-panel" class="sub-panel hidden">
+                    <div class="mb-6"><h2 class="font-display text-2xl font-bold mb-1">Wardrobe</h2><p class="text-slate-400 text-sm">Character looks and continuity</p></div>
+                    <div id="wardrobe-list" class="space-y-6"></div>
+                </div>
+                <div id="cast-panel" class="sub-panel hidden"><div class="flex items-center justify-center h-96 text-slate-500"><i class="fas fa-users text-5xl mb-4"></i><p>Cast profiles synced from script</p></div></div>
+            </div>
+
+            <!-- BEATS -->
+            <div id="beats-content" class="content-panel hidden h-full overflow-y-auto p-6 scrollbar-thin">
+                <div class="flex items-center justify-center h-96 text-slate-500"><div class="text-center"><i class="fas fa-chart-line text-5xl mb-4"></i><p>Beats & Structure coming soon</p></div></div>
+            </div>
+
+            <!-- VISUALS -->
+            <div id="visuals-content" class="content-panel hidden h-full overflow-y-auto p-6 scrollbar-thin">
+                <div id="storyboards-panel" class="sub-panel">
+                    <div class="mb-6 flex items-center justify-between">
+                        <div><h2 class="font-display text-2xl font-bold mb-1">Storyboards</h2><p class="text-slate-400 text-sm">Frames auto-generated from script beats</p></div>
+                        <select id="storyboard-filter" class="bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm"><option value="all">All Scenes</option></select>
+                    </div>
+                    <div id="storyboard-groups" class="space-y-8"></div>
+                </div>
+                <div id="shot-composer-panel" class="sub-panel hidden">
+                    <div class="flex items-center justify-between mb-4">
+                        <div><h2 class="font-display text-2xl font-bold mb-1">Shot Composer</h2><p class="text-slate-400 text-sm">Compose, lock, and generate frames</p></div>
+                        <button id="back-to-boards" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 rounded-xl text-xs"><i class="fas fa-arrow-left mr-1"></i>Back to Boards</button>
+                    </div>
+                    <div class="glass rounded-xl p-3 mb-6 flex items-center gap-2 overflow-x-auto scrollbar-thin" id="shot-navigator"></div>
+                    <div class="grid grid-cols-1 xl:grid-cols-[1.1fr_0.9fr_0.8fr] gap-6">
+                        <div class="space-y-4">
+                            <div class="frame-canvas guide-grid rounded-xl border border-slate-700 relative overflow-hidden">
+                                <div class="absolute inset-0 grid place-items-center text-center">
+                                    <div><div id="composer-preview-icon" class="w-20 h-20 mx-auto mb-3 rounded-full bg-slate-800 grid place-items-center"><i class="fas fa-camera text-2xl text-slate-500"></i></div><p id="composer-preview-label" class="text-sm text-slate-400">No frame generated yet</p></div>
+                                </div>
+                                <div class="absolute top-3 left-3 px-2 py-1 bg-black/60 rounded text-[10px] tracking-wider" id="composer-shot-label">—</div>
+                                <div class="absolute bottom-3 right-3 px-2 py-1 bg-black/60 rounded text-[10px]" id="composer-location-tag">—</div>
+                            </div>
+                        <div class="space-y-5">
+                            <div class="glass rounded-xl p-5">
+                                <h3 class="font-semibold mb-3 text-sm uppercase tracking-wider text-slate-300">Camera</h3>
+                                <div class="space-y-3 text-sm">
+                                    <div class="flex items-center justify-between"><label class="text-slate-400">Shot Type</label><select id="composer-shot-type" class="bg-slate-800 border border-slate-700 rounded px-3 py-1.5 text-xs w-40"></select></div>
+                                    <div class="flex items-center justify-between"><label class="text-slate-400">Angle</label><select id="composer-angle" class="bg-slate-800 border border-slate-700 rounded px-3 py-1.5 text-xs w-40"></select></div>
+                                    <div class="flex items-center justify-between"><label class="text-slate-400">Movement</label><select id="composer-movement" class="bg-slate-800 border border-slate-700 rounded px-3 py-1.5 text-xs w-40"></select></div>
+                                    <div><div class="flex items-center justify-between mb-1"><label class="text-slate-400">FOV</label><span class="text-xs" id="composer-fov-val">35mm</span></div><input id="composer-fov" type="range" min="18" max="85" value="35" class="slider w-full h-1 bg-slate-700 rounded-lg"></div>
+                                </div>
+                            </div>
+                            <div class="glass rounded-xl p-5">
+                                <h3 class="font-semibold mb-3 text-sm uppercase tracking-wider text-slate-300">Lighting</h3>
+                                <select id="composer-lighting" class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm"></select>
+                            </div>
+                            <div class="glass rounded-xl p-5">
+                                <h3 class="font-semibold mb-3 text-sm uppercase tracking-wider text-slate-300">Character Locks</h3>
+                                <div id="composer-char-locks" class="space-y-3"></div>
+                            </div>
+                            <button id="generate-frame-btn" class="w-full px-4 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 rounded-xl font-medium"><i class="fas fa-wand-magic-sparkles mr-2"></i>Generate Frame</button>
+                        </div>
+                        <div class="space-y-5">
+                            <div class="glass rounded-xl p-5">
+                                <h3 class="font-semibold mb-3 text-sm uppercase tracking-wider text-slate-300">Shot Metadata</h3>
+                                <dl class="text-sm space-y-2">
+                                    <div class="flex justify-between"><dt class="text-slate-500">Scene</dt><dd id="ins-scene" class="text-slate-200">—</dd></div>
+                                    <div class="flex justify-between"><dt class="text-slate-500">Shot</dt><dd id="ins-shot" class="text-slate-200">—</dd></div>
+                                    <div class="flex justify-between"><dt class="text-slate-500">Location</dt><dd id="ins-location" class="text-slate-200">—</dd></div>
+                                    <div class="flex justify-between"><dt class="text-slate-500">Characters</dt><dd id="ins-characters" class="text-slate-200">—</dd></div>
+                                    <div class="flex justify-between"><dt class="text-slate-500">Status</dt><dd id="ins-status" class="text-amber-400">Draft</dd></div>
+                                </dl>
+                            </div>
+                            <div class="glass rounded-xl p-5">
+                                <h3 class="font-semibold mb-3 text-sm uppercase tracking-wider text-slate-300">Prompt Preview</h3>
+                                <pre id="prompt-preview" class="bg-slate-900/70 rounded-lg p-3 text-xs text-slate-300 whitespace-pre-wrap leading-relaxed">—</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PRODUCTION -->
+            <div id="production-content" class="content-panel hidden h-full overflow-y-auto p-6 scrollbar-thin">
+                <div class="flex items-center justify-center h-96 text-slate-500"><p>Production tools coming soon</p></div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="fixed bottom-6 right-6 z-50 hidden">
+    <div class="px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 shadow-2xl flex items-center gap-3 min-w-[300px]">
+        <div class="w-9 h-9 rounded-lg bg-blue-600/20 grid place-items-center text-blue-400"><i class="fas fa-check"></i></div>
+        <div class="text-sm"><div class="font-medium" id="toastTitle">Done</div><div class="text-slate-400 text-xs" id="toastMsg">—</div></div>
+    </div>
+</div>
+
+<script>
+const App = (() => {
+    const state = {
+        leftTab: 'Breakdown',
+        topTab: 'overview',
+        breakdownTab: 'overview',
+        selectedSceneId: 1,
+        storyboardFilter: 'all',
+        currentShotId: null,
+        script: '',
+        parsed: { scenes: [], characters: [], locations: [] },
+        data: {}
+    };
+
+    const tabConfig = {
+        'Script': ['Editor'],
+        'Breakdown': [],
+        'Entities': ['Locations','Props','Wardrobe','Cast'],
+        'Beats & Structure': [],
+        'Visuals': ['Storyboards','Shot Composer'],
+        'Production': []
+    };
+
+    const sampleScreenplay = `FADE IN:
+
+INT. APARTMENT - NIGHT
+
+MIRA paces, clutching a chipped COFFEE MUG. Rain drums against the window.
+
+MIRA
+(whispering)
+It wasn't supposed to end like this.
+
+A broken LAPTOP flickers on the desk. She opens an ENVELOPE WITH CASH.
+
+DETECTIVE HAYES enters, soaking wet.
+
+DETECTIVE HAYES
+You shouldn't be here.
+
+MIRA pulls a VINTAGE REVOLVER from the drawer.
+
+CUT TO:
+
+EXT. ALLEY - RAIN
+
+MIRA runs. Neon reflects in puddles. She drops the ENVELOPE.
+
+DETECTIVE HAYES
+Stop!
+
+They struggle. The REVOLVER slides.
+
+INT. WAREHOUSE - DAY
+
+Dust motes. MIRA sits alone, the COFFEE MUG empty. The LAPTOP closed.
+
+MIRA (V.O.)
+Some nights don't end. They just... pause.
+`;
+
+    const DATA = {
+        scenes: [
+            { id:1, num:'1', slug:'INT. APARTMENT - NIGHT', pages:2.1, readiness:92, intExt:'INT', time:'NIGHT' },
+            { id:2, num:'2', slug:'EXT. ALLEY - RAIN', pages:1.8, readiness:88, intExt:'EXT', time:'NIGHT' },
+            { id:3, num:'3', slug:'INT. WAREHOUSE - DAY', pages:4.2, readiness:75, intExt:'INT', time:'DAY' },
+            { id:4, num:'4', slug:'INT. APARTMENT - DAY', pages:1.5, readiness:90, intExt:'INT', time:'DAY' },
+            { id:5, num:'5', slug:'EXT. ROOFTOP - NIGHT', pages:2.7, readiness:65, intExt:'EXT', time:'NIGHT' },
+            { id:6, num:'6', slug:'INT. POLICE STATION - DAY', pages:3.1, readiness:80, intExt:'INT', time:'DAY' },
+            { id:7, num:'7', slug:'EXT. ALLEY - RAIN', pages:1.2, readiness:85, intExt:'EXT', time:'NIGHT' },
+            { id:8, num:'8', slug:'INT. APARTMENT - NIGHT', pages:2.4, readiness:70, intExt:'INT', time:'NIGHT' },
+        ],
+        characters: [
+            { name:'MIRA', scenes:6, first:'1', last:'8', wardrobe:'Locked', lock:80, status:'lead', sceneIds:[1,2,3,5,7,8] },
+            { name:'DETECTIVE HAYES', scenes:5, first:'1', last:'8', wardrobe:'Fitting', lock:75, status:'support', sceneIds:[1,2,4,6,8] },
+            { name:'THE COURIER', scenes:2, first:'2', last:'7', wardrobe:'Needed', lock:60, status:'featured', sceneIds:[2,7] },
+        ],
+        locations: [
+            { name:'INT. APARTMENT - NIGHT', scenes:[1,4,8], backdrop:'Built', cameras:5, lighting:'Practical Low Key', status:'ready' },
+            { name:'EXT. ALLEY - RAIN', scenes:[2,7], backdrop:'Location Scouted', cameras:8, lighting:'Wet Down + Backlight', status:'prep' },
+            { name:'INT. WAREHOUSE - DAY', scenes:[3], backdrop:'Stage Build', cameras:6, lighting:'Top Light Grid', status:'ready' },
+        ],
+        props: [
+            { name:'Vintage Revolver', critical:true, status:'Acquired', scenes:[1,5], notes:'Hero + stunt' },
+            { name:'Broken Laptop', critical:false, status:'On Set', scenes:[1,3], notes:'Screen flicker' },
+            { name:'Envelope with Cash', critical:false, status:'Needed', scenes:[1,2], notes:'Prop money' },
+        ],
+        wardrobe: [
+            { character:'MIRA', scene:'1', outfit:'Black hoodie, jeans, boots', continuity:'Establishing', warning:false },
+            { character:'MIRA', scene:'8', outfit:'Same hoodie, blood spatter', continuity:'Continues', warning:true },
+        ],
+        vfx: [
+            { name:'Rain Enhancement', scenes:[2,7], complexity:'High', vendor:'Outsource' },
+            { name:'Muzzle Flash', scenes:[5], complexity:'Medium', vendor:'In-house' },
+        ],
+        sfx: [
+            { name:'Rain on Metal', scenes:[2,7], type:'Foley' },
+            { name:'Phone Vibration', scenes:[1], type:'Foley' },
+        ]
+    };
+    state.data = DATA;
+
+    function init() {
+        document.getElementById('script-editor').value = sampleScreenplay;
+        updateLineNumbers();
+        state.script = sampleScreenplay;
+        parseScript(true);
+        renderAll();
+        setupEvents();
+        switchLeftTab('Breakdown');
+    }
+
+    function hash(s){ let h=0; for(let i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h|=0} return h.toString(16); }
+
+    function parseScript(initial=false) {
+        const text = document.getElementById('script-editor').value;
+        state.script = text;
+        const sceneRegex = /^(INT\.|EXT\.|INT\/EXT\.)\s+([^\n-]+?)(?:\s*-\s*(DAY|NIGHT|DUSK|DAWN|RAIN))?$/gm;
+        const scenes = [];
+        let m, idx=1;
+        while((m = sceneRegex.exec(text))) {
+            scenes.push({ id: idx, num:String(idx), slug:`${m[1]} ${m[2].trim()}${m[3?' - '+m[3]:''}`, pages:+(Math.random()*2+1).toFixed(1), readiness:70+Math.floor(Math.random()*25), intExt:m[1].replace('.',''), time:m[3]||'DAY' });
+            idx++;
+        }
+        if(scenes.length) state.data.scenes = scenes.slice(0,8);
+        state.parsed.scenes = state.data.scenes;
+        updateOutline();
+        renderBreakdownSceneList();
+        renderBreakdown();
+        renderScriptSceneNav();
+        buildStoryboard();
+        renderStoryboard();
+        populateStoryboardFilter();
+        document.getElementById('last-sync').textContent = new Date().toLocaleTimeString();
+        document.getElementById('diff-banner').classList.add('hidden');
+        if(!initial) showToast('Script Synced','Breakdown updated from parse');
+    }
+
+    function updateLineNumbers() {
+        const ta = document.getElementById('script-editor');
+        const lines = ta.value.split('\n').length;
+        document.getElementById('line-numbers').textContent = Array.from({length:lines},(_,i)=>i+1).join('\n');
+    }
+
+    function updateOutline() {
+        const el = document.getElementById('outline-lists');
+        el.innerHTML = `
+            <div>
+                <h4 class="text-sm font-semibold text-slate-200 mb-2">Scenes</h4>
+                <ul class="space-y-1 text-xs text-slate-400 max-h-32 overflow-auto scrollbar-thin">
+                    ${state.data.scenes.map(s=>`<li class="flex items-center gap-2"><i class="fas fa-film text-slate-600"></i>${s.slug}</li>`).join('')}
+                </ul>
+            </div>
+        `;
+    }
+
+    function renderScriptSceneNav() {
+        const nav = document.getElementById('script-scene-nav');
+        nav.innerHTML = state.data.scenes.map(s=>`
+            <button data-scene-id="${s.id}" class="w-full text-left px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-sm flex items-center justify-between">
+                <span>Sc ${s.num} • ${s.slug.replace('INT. ','').replace('EXT. ','')}</span>
+                <i class="fas fa-arrow-right text-slate-500"></i>
+            </button>
+        `).join('');
+        nav.querySelectorAll('button').forEach(b=> b.onclick = ()=> {
+            state.selectedSceneId = +b.dataset.sceneId;
+            showToast('Scene Selected',`Scene ${state.selectedSceneId} highlighted`);
+        });
+    }
+
+    function switchLeftTab(tab) {
+        state.leftTab = tab;
+        document.querySelectorAll('.left-tab').forEach(b=>{
+            b.classList.toggle('tab-active', b.dataset.leftTab===tab);
+            b.classList.toggle('text-slate-300', b.dataset.leftTab!==tab);
+        });
+        document.querySelectorAll('.content-panel').forEach(p=>p.classList.add('hidden'));
+        const id = tab.toLowerCase().replace(/\s+&\s+/g,'-').replace(/\s+/g,'-') + '-content';
+        document.getElementById(id)?.classList.remove('hidden');
+        renderTopTabs(tab);
+    }
+
+    function renderTopTabs(tab) {
+        const container = document.getElementById('top-tabs');
+        const tabs = tabConfig[tab] || [];
+        container.innerHTML = '';
+        tabs.forEach((t,i)=>{
+            const btn = document.createElement('button');
+            btn.className = `px-4 py-2 text-sm font-medium border-b-2 ${i===0?'top-tab-active border-transparent':'border-transparent text-slate-400 hover:text-white'}`;
+            btn.textContent = t;
+            const key = t.toLowerCase().replace(/\s+/g,'-');
+            btn.dataset.topTab = key;
+            btn.onclick = ()=> switchTopTab(key);
+            container.appendChild(btn);
+        });
+        if(tabs.length) switchTopTab(tabs[0].toLowerCase().replace(/\s+/g,'-'));
+    }
+
+    function switchTopTab(key) {
+        document.querySelectorAll('#top-tabs button').forEach(b=>{
+            b.classList.toggle('top-tab-active', b.dataset.topTab===key);
+        });
+        document.querySelectorAll('.sub-panel').forEach(p=>p.classList.add('hidden'));
+        const panel = document.getElementById(`${key}-panel`);
+        if(panel) panel.classList.remove('hidden');
+    }
+
+    // BREAKDOWN
+    function readinessDot(v){
+        if(v>=85) return '<span class="w-2.5 h-2.5 rounded-full bg-emerald-400 ready-dot"></span>';
+        if(v>=70) return '<span class="w-2.5 h-2.5 rounded-full bg-amber-400 warn-dot"></span>';
+        return '<span class="w-2.5 h-2.5 rounded-full bg-red-400 danger-dot"></span>';
+    }
+
+    function renderBreakdownSceneList() {
+        const q = (document.getElementById('breakdown-scene-search')?.value || '').toLowerCase();
+        const list = state.data.scenes.filter(s=> s.slug.toLowerCase().includes(q));
+        document.getElementById('breakdown-scene-count').textContent = `${list.length} SCENES`;
+        const container = document.getElementById('breakdown-scene-list');
+        container.innerHTML = list.map(s=>`
+            <div class="group relative rounded-xl border ${state.selectedSceneId===s.id?'bg-blue-600/15 border-blue-500/50':'bg-slate-800/60 border-slate-700 hover:border-slate-600'} p-3 cursor-pointer transition" data-scene="${s.id}">
+                <div class="flex items-start gap-3">
+                    <div class="mt-1">${readinessDot(s.readiness)}</div>
+                    <div class="min-w-0 flex-1">
+                        <div class="flex items-center gap-2">
+                            <span class="mono text-xs px-1.5 py-0.5 rounded bg-slate-700 text-slate-300">${s.num}</span>
+                            <span class="text-[10px] uppercase px-1.5 py-0.5 rounded bg-slate-700/70 text-slate-400">${s.intExt}</span>
+                            <span class="ml-auto text-xs mono text-slate-500">${s.pages.toFixed(1)}p</span>
+                        </div>
+                        <div class="text-sm font-medium mt-1 truncate">${s.slug}</div>
+                        <div class="mt-2 hidden group-hover:flex gap-1.5">
+                            <button data-action="script" class="px-2 py-1 text-[10px] rounded-lg bg-slate-700 hover:bg-slate-600">Open in Script</button>
+                            <button data-action="board" class="px-2 py-1 text-[10px] rounded-lg bg-slate-700 hover:bg-slate-600">Storyboard</button>
+                            <button data-action="composer" class="px-2 py-1 text-[10px] rounded-lg bg-blue-600 hover:bg-blue-500">Compose</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+        container.querySelectorAll('[data-scene]').forEach(el=>{
+            el.onclick = (e)=>{
+                if(e.target.closest('button')) return;
+                state.selectedSceneId = +el.dataset.scene;
+                renderBreakdownSceneList();
+                renderBreakdown();
+            };
+            el.querySelectorAll('button').forEach(btn=>{
+                btn.onclick = (ev)=>{
+                    ev.stopPropagation();
+                    const id = +el.dataset.scene;
+                    state.selectedSceneId = id;
+                    const act = btn.dataset.action;
+                    if(act==='script') openInScript(id);
+                    if(act==='board') openInStoryboard(id);
+                    if(act==='composer') openInComposer(id);
+                };
+            });
+        });
+    }
+
+    function openInScript(id){
+        switchLeftTab('Script');
+        showToast('Open in Script',`Scene ${id} highlighted`);
+        // highlight in nav
+        document.querySelectorAll('#script-scene-nav button').forEach(b=> b.classList.toggle('ring-2', +b.dataset.sceneId===id));
+    }
+    function openInStoryboard(id){
+        switchLeftTab('Visuals');
+        switchTopTab('storyboards');
+        state.storyboardFilter = id;
+        const sel = document.getElementById('storyboard-filter');
+        if(sel) sel.value = String(id);
+        renderStoryboard();
+        showToast('Storyboard',`Filtered to Scene ${id}`);
+    }
+    function openInComposer(id){
+        switchLeftTab('Visuals');
+        switchTopTab('shot-composer');
+        const firstShot = state.storyboard.find(s=> s.sceneId===id);
+        if(firstShot) loadShot(firstShot.id);
+        showToast('Shot Composer',`First shot of Scene ${id} loaded`);
+    }
+
+    function renderBreakdown() {
+        const tab = state.breakdownTab;
+        const el = document.getElementById('breakdown-main');
+        const renderers = {
+            overview: renderBDOverview,
+            characters: renderBDCharacters,
+            locations: renderBDLocations,
+            props: renderBDProps,
+            wardrobe: renderBDWardrobe,
+            vfx: renderBDVfx,
+            sfx: renderBDSfx
+        };
+        el.innerHTML = `<div class="slide-in">${renderers[tab]()}</div>`;
+    }
+
+    function renderBDOverview() {
+        const sel = state.data.scenes.find(s=>s.id===state.selectedSceneId);
+        return `
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            ${[
+                {label:'Scenes', val: state.data.scenes.length},
+                {label:'Characters', val: state.data.characters.length},
+                {label:'Locations', val: state.data.locations.length},
+                {label:'Props', val: state.data.props.length},
+            ].map(c=>`
+            <div class="rounded-2xl border border-slate-800 bg-slate-900/60 p-4">
+                <div class="text-xs uppercase text-slate-400">${c.label}</div>
+                <div class="text-2xl font-semibold mt-1">${c.val}</div>
+            </div>`).join('')}
+        </div>
+        <div class="grid lg:grid-cols-3 gap-4">
+            <div class="lg:col-span-2 rounded-2xl border border-slate-800 bg-slate-900/60 p-5">
+                <h3 class="font-semibold mb-4 flex items-center gap-2"><i class="fas fa-gauge-high text-blue-400"></i>Selected Scene</h3>
+                <div class="p-4 rounded-xl bg-slate-800/60 border border-slate-700">
+                    <div class="font-medium">${sel?.slug}</div>
+                    <div class="text-sm text-slate-400 mt-1">Readiness ${sel?.readiness}% • ${sel?.pages}p • ${sel?.time}</div>
+                    <div class="mt-3 flex gap-2">
+                        <button onclick="window.__openScript(${sel.id})" class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-xs"><i class="fas fa-scroll mr-1"></i>Open in Script</button>
+                        <button onclick="window.__openBoard(${sel.id})" class="px-3 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-xs"><i class="fas fa-images mr-1"></i>Storyboard</button>
+                    </div>
+                </div>
+            <div class="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-5">
+                <h3 class="font-semibold mb-2 flex items-center gap-2"><i class="fas fa-triangle-exclamation text-amber-400"></i>Next Step</h3>
+                <p class="text-sm text-amber-100/90">Lock wardrobe continuity for MIRA between Sc ${sel?.num} → ${+sel?.num+1}.</p>
+            </div>
+        </div>`;
+    }
+    window.__openScript = openInScript;
+    window.__openBoard = openInStoryboard;
+
+    function renderBDCharacters() {
+        let chars = [...state.data.characters];
+        if(state.selectedSceneId) chars = chars.filter(c=> c.sceneIds.includes(state.selectedSceneId));
+        return `<div class="rounded-2xl border border-slate-800 overflow-hidden bg-slate-900/60">
+        <table class="w-full text-sm"><thead class="bg-slate-800/60 text-slate-400 uppercase text-xs"><tr>
+        <th class="text-left px-4 py-3">Character</th><th class="px-4 py-3">Scenes</th><th class="px-4 py-3">Wardrobe</th><th class="px-4 py-3">Lock</th></tr></thead>
+        <tbody class="divide-y divide-slate-800">
+        ${chars.map(c=>`<tr class="hover:bg-slate-800/40"><td class="px-4 py-3 font-medium">${c.name}</td><td class="px-4 py-3 mono">${c.scenes}</td><td class="px-4 py-3">${c.wardrobe}</td><td class="px-4 py-3">${c.lock}%</td></tr>`).join('')}
+        </tbody></table></div>`;
+    }
+    function renderBDLocations() {
+        let locs = [...state.data.locations];
+        if(state.selectedSceneId) locs = locs.filter(l=> l.scenes.includes(state.selectedSceneId));
+        return `<div class="grid md:grid-cols-2 gap-4">
+        ${locs.map(l=>`
+            <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-5">
+                <div class="flex justify-between mb-2"><h4 class="font-semibold">${l.name}</h4><span class="text-xs px-2 py-1 rounded-full bg-emerald-500/15 text-emerald-300">${l.status}</span></div>
+                <div class="text-sm space-y-1 text-slate-400"><div>Scenes: ${l.scenes.join(', ')}</div><div>Backdrop: ${l.backdrop}</div><div>Lighting: ${l.lighting}</div></div>
+                <button onclick="window.__openBoard(${l.scenes[0]})" class="mt-3 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs">Open Boards</button>
+            </div>
+        `).join('')}</div>`;
+    }
+    function renderBDProps() {
+        let props = [...state.data.props];
+        if(state.selectedSceneId) props = props.filter(p=> p.scenes.includes(state.selectedSceneId));
+        return `<div class="space-y-2">${props.map(p=>`
+            <div class="flex items-center gap-4 p-4 rounded-2xl border border-slate-800 bg-slate-900/60">
+                <i class="fas fa-box text-slate-500"></i>
+                <div class="flex-1"><div class="font-medium">${p.name}</div><div class="text-xs text-slate-500">Scenes ${p.scenes.join(', ')} • ${p.notes}</div></div>
+                <span class="px-2 py-1 rounded-lg text-xs bg-slate-800">${p.status}</span>
+            </div>
+        `).join('')}</div>`;
+    }
+    function renderBDWardrobe() {
+        const rows = [...state.data.wardrobe];
+        return `<div class="rounded-2xl border border-slate-800 overflow-hidden bg-slate-900/60"><table class="w-full text-sm"><thead class="bg-slate-800/60 text-slate-400 uppercase text-xs"><tr><th class="px-4 py-3 text-left">Character</th><th class="px-4 py-3">Scene</th><th class="px-4 py-3">Outfit</th><th class="px-4 py-3">Warning</th></tr></thead><tbody class="divide-y divide-slate-800">${rows.map(r=>`<tr><td class="px-4 py-3">${r.character}</td><td class="px-4 py-3 mono">${r.scene}</td><td class="px-4 py-3">${r.outfit}</td><td class="px-4 py-3">${r.warning?'<span class="text-amber-400">Check</span>':'—'}</td></tr>`).join('')}</tbody></table></div>`;
+    }
+    function renderBDVfx() {
+        return `<div class="grid md:grid-cols-2 gap-4">${state.data.vfx.map(v=>`<div class="p-5 rounded-2xl border border-slate-800 bg-slate-900/60"><h4 class="font-semibold">${v.name}</h4><div class="text-sm text-slate-400">Scenes ${v.scenes.join(', ')}</div></div>`).join('')}</div>`;
+    }
+    function renderBDSfx() {
+        return `<div class="space-y-2">${state.data.sfx.map(s=>`<div class="p-4 rounded-xl border border-slate-800 bg-slate-900/60 flex justify-between"><span>${s.name}</span><span class="text-xs text-slate-400">${s.type}</span></div>`).join('')}</div>`;
+    }
+
+    // ENTITIES
+    function renderLocations() {
+        const grid = document.getElementById('locations-grid');
+        grid.innerHTML = state.data.locations.map(l=>`
+            <div class="glass rounded-2xl overflow-hidden card-hover">
+                <div class="p-5 border-b border-slate-700"><h3 class="font-display font-semibold">${l.name}</h3></div>
+                <div class="p-5">
+                    <div class="floorplan-grid aspect-[4/3] rounded-lg border border-slate-700 mb-4 grid place-items-center text-slate-600"><i class="fas fa-vector-square text-3xl"></i></div>
+                    <button class="w-full px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl text-sm"><i class="fas fa-wand-magic-sparkles mr-2"></i>Generate Backdrop</button>
+                </div>
+            </div>
+        `).join('');
+    }
+    function renderProps() {
+        const grid = document.getElementById('props-grid');
+        grid.innerHTML = state.data.props.map(p=>`
+            <div class="glass rounded-xl overflow-hidden card-hover">
+                <div class="aspect-square bg-slate-800 grid place-items-center"><i class="fas fa-box-open text-4xl text-slate-600"></i></div>
+                <div class="p-4"><h3 class="font-semibold">${p.name}</h3><p class="text-xs text-slate-400">${p.notes}</p></div>
+            </div>
+        `).join('');
+    }
+    function renderWardrobe() {
+        const list = document.getElementById('wardrobe-list');
+        list.innerHTML = `
+            <div class="glass rounded-2xl p-5">
+                <h3 class="font-semibold mb-3">MIRA • Look 1</h3>
+                <div class="grid grid-cols-4 gap-3 text-center text-xs">
+                    ${['Hoodie','Jeans','Boots','Watch'].map(i=>`<div class="bg-slate-800 rounded-lg p-3">${i}</div>`).join('')}
+                </div>
+            </div>
+        `;
+    }
+
+    // STORYBOARD
+    function buildStoryboard() {
+        const shots = [];
+        state.data.scenes.forEach(sc=>{
+            const count = sc.id%2?4:3;
+            for(let i=0;i<count;i++){
+                const label = `${sc.num}${String.fromCharCode(65+i)}`;
+                shots.push({
+                    id:label, sceneId:sc.id, label,
+                    location: sc.slug,
+                    characters: state.data.characters.filter(c=>c.sceneIds.includes(sc.id)).map(c=>c.name).slice(0,2),
+                    status: ['Draft','Approved','Needs Backdrop'][i%3],
+                    shotType:['Wide Shot','Medium Shot','Close-up'][i%3],
+                    angle:['Eye Level','High Angle','Low Angle'][i%3],
+                    movement:['Static','Dolly','Pan'][i%3],
+                    fov:[24,35,50][i%3],
+                    lighting:'Low Key'
+                });
+            }
+        });
+        state.storyboard = shots;
+    }
+    function populateStoryboardFilter() {
+        const sel = document.getElementById('storyboard-filter');
+        sel.innerHTML = `<option value="all">All Scenes</option>` + state.data.scenes.map(s=>`<option value="${s.id}">Scene ${s.num} • ${s.slug.split(' - ')[0]}</option>`).join('');
+    }
+    function renderStoryboard() {
+        const filter = document.getElementById('storyboard-filter')?.value || 'all';
+        const groups = {};
+        state.storyboard.forEach(s=>{
+            if(filter!=='all' && String(s.sceneId)!==filter) return;
+            (groups[s.sceneId] ||= []).push(s);
+        });
+        const container = document.getElementById('storyboard-groups');
+        container.innerHTML = Object.entries(groups).map(([sid, shots])=>{
+            const sc = state.data.scenes.find(s=>s.id==sid);
+            return `
+            <div>
+                <div class="flex items-center gap-3 mb-3"><h3 class="font-display font-semibold">Scene ${sc.num} • ${sc.slug}</h3><span class="px-2 py-0.5 bg-slate-700 rounded-full text-xs">${shots.length} shots</span></div>
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+                    ${shots.map(sh=>`
+                        <button data-shot-id="${sh.id}" class="storyboard-frame glass rounded-xl overflow-hidden text-left border border-slate-700 hover:border-blue-500">
+                            <div class="aspect-video backdrop-placeholder grid place-items-center"><i class="fas fa-image text-3xl text-slate-600"></i></div>
+                            <div class="p-3 text-xs"><div class="flex justify-between"><span class="text-slate-400">${sh.shotType}</span><span class="px-1.5 py-0.5 bg-slate-800 rounded">${sh.status}</span></div><div class="mt-1 flex gap-1 flex-wrap">${sh.characters.map(c=>`<span class="px-1.5 py-0.5 bg-blue-500/15 text-blue-300 rounded text-[10px]">${c}</span>`).join('')}</div></div>
+                        </button>
+                    `).join('')}
+                </div>
+            </div>`;
+        }).join('');
+        container.querySelectorAll('.storyboard-frame').forEach(b=> b.onclick = ()=> openInComposer(state.selectedSceneId, b.dataset.shotId));
+    }
+    function openInComposer(sceneId, shotId=null) {
+        switchLeftTab('Visuals');
+        switchTopTab('shot-composer');
+        const first = state.storyboard.find(s=> s.sceneId===sceneId) || state.storyboard[0];
+        loadShot(shotId || first.id);
+    }
+
+    // SHOT COMPOSER
+    function loadShot(id) {
+        const sh = state.storyboard.find(s=>s.id===id);
+        if(!sh) return;
+        state.currentShotId = id;
+        document.getElementById('composer-shot-label').textContent = sh.label;
+        document.getElementById('composer-location-tag').textContent = sh.location;
+        document.getElementById('ins-scene').textContent = sh.sceneId;
+        document.getElementById('ins-shot').textContent = sh.label;
+        document.getElementById('ins-location').textContent = sh.location;
+        document.getElementById('ins-characters').textContent = sh.characters.join(', ');
+        document.getElementById('ins-status').textContent = sh.status;
+
+        // navigator
+        const nav = document.getElementById('shot-navigator');
+        const sceneShots = state.storyboard.filter(s=>s.sceneId===sh.sceneId);
+        nav.innerHTML = sceneShots.map(s=>`<button data-shot="${s.id}" class="shot-pill px-3 py-1.5 rounded-full text-xs bg-slate-800 ${s.id===id?'active':''}">${s.label}</button>`).join('');
+        nav.querySelectorAll('button').forEach(b=> b.onclick = ()=> loadShot(b.dataset.shot));
+
+        // fill selects
+        const fill = (id, arr, val)=>{ const el=document.getElementById(id); el.innerHTML = arr.map(v=>`<option ${v===val?'selected':''}>${v}</option>`).join(''); };
+        fill('composer-shot-type',['Wide Shot','Medium Shot','Close-up','Extreme Close-up'], sh.shotType);
+        fill('composer-angle',['Eye Level','High Angle','Low Angle','Dutch Angle'], sh.angle);
+        fill('composer-movement',['Static','Dolly','Orbit','Pan'], sh.movement);
+        fill('composer-lighting',['3-Point','High Key','Low Key','Natural'], sh.lighting);
+        document.getElementById('composer-fov').value = sh.fov;
+        document.getElementById('composer-fov-val').textContent = sh.fov+'mm';
+
+        document.getElementById('composer-char-locks').innerHTML = sh.characters.map(ch=>`
+            <div class="bg-slate-800/60 rounded-lg p-3 flex items-center justify-between">
+                <span class="text-sm">${ch}</span>
+                <label class="toggle-switch scale-75"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+            </div>
+        `).join('');
+
+        updatePrompt();
+    }
+    function updatePrompt() {
+        const sh = state.storyboard.find(s=>s.id===state.currentShotId);
+        if(!sh) return;
+        const prompt = `${sh.shotType} of ${sh.characters.join(' & ')}, ${sh.angle.toLowerCase()}, ${sh.lighting.toLowerCase()} lighting, ${sh.fov}mm, ${sh.movement.toLowerCase()} camera. Location: ${sh.location}. Cinematic, moody.`;
+        document.getElementById('prompt-preview').textContent = prompt;
+    }
+
+    function renderAll() {
+        renderLocations();
+        renderProps();
+        renderWardrobe();
+        renderBreakdownSceneList();
+        renderBreakdown();
+        buildStoryboard();
+        renderStoryboard();
+        populateStoryboardFilter();
+    }
+
+    function setupEvents() {
+        document.querySelectorAll('.left-tab').forEach(b=> b.onclick = ()=> switchLeftTab(b.dataset.leftTab));
+        document.getElementById('script-editor').addEventListener('input', ()=>{
+            updateLineNumbers();
+            document.getElementById('diff-banner').classList.remove('hidden');
+        });
+        document.getElementById('parse-sync-btn').onclick = ()=> parseScript();
+        document.getElementById('reparse-btn').onclick = ()=> parseScript();
+        document.getElementById('breakdown-scene-search').addEventListener('input', renderBreakdownSceneList);
+        document.querySelectorAll('.bd-tab').forEach(b=> b.onclick = ()=>{
+            document.querySelectorAll('.bd-tab').forEach(x=> x.classList.remove('breakdown-tab-active','border-blue-500/50'));
+            b.classList.add('breakdown-tab-active','border-blue-500/50');
+            state.breakdownTab = b.dataset.bdTab;
+            renderBreakdown();
+        });
+        document.getElementById('bd-export').onclick = ()=> showToast('Exported','Breakdown CSV downloaded');
+        document.getElementById('storyboard-filter').addEventListener('change', renderStoryboard);
+        document.getElementById('back-to-boards').onclick = ()=> switchTopTab('storyboards');
+        document.getElementById('generate-frame-btn').onclick = function(){
+            this.innerHTML = '<i class="fas fa-spinner spin mr-2"></i>Generating...';
+            setTimeout(()=>{ this.innerHTML = '<i class="fas fa-check mr-2"></i>Regenerate Frame'; showToast('Frame Generated','Locked to wardrobe & props'); },1500);
+        };
+        ['composer-shot-type','composer-angle','composer-movement','composer-lighting'].forEach(id=> document.getElementById(id)?.addEventListener('change', updatePrompt));
+        document.getElementById('composer-fov').addEventListener('input', e=>{ document.getElementById('composer-fov-val').textContent = e.target.value+'mm'; updatePrompt(); });
+    }
+
+    function showToast(title,msg){
+        document.getElementById('toastTitle').textContent = title;
+        document.getElementById('toastMsg').textContent = msg;
+        const t = document.getElementById('toast');
+        t.classList.remove('hidden');
+        setTimeout(()=> t.classList.add('hidden'),3000);
+    }
+
+    return { init };
+})();
+
+document.addEventListener('DOMContentLoaded', App.init);
+</script>
+<script>(function(){document.addEventListener("click",function(e){var a=e.target.closest("[data-product-id]");if(!a)return;e.preventDefault();var pid=a.getAttribute("data-product-id");if(pid)parent.postMessage({type:"ecto-artifact-link-click",productId:pid},"*")})})();</script>
+</body>
+</html>
