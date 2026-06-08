@@ -213,11 +213,30 @@
         .scrollbar-thin::-webkit-scrollbar-track { background: var(--bg-secondary); }
         .scrollbar-thin::-webkit-scrollbar-thumb { background: var(--bg-tertiary); border-radius:3px; }
         .scrollbar-thin::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+        
+        #top-tabs-container{
+        background:#0f141c;
+        }
+        
+        #top-global-bar{
+        background:#070c15;        
+        }
+        
+        #left-vertical-tabs{
+        background:#0b121d;
+        }
+        #main-content{
+        padding:1.25rem;
+        }
+        
+        h2{
+        color:#3d72a0;
+        }
     </style>
 </head>
 <body class="bg-[#0f172a] text-slate-200 cinematic-bg min-h-screen antialiased">
     <!-- Top Global Bar -->
-    <div class="h-14 border-b border-slate-700 bg-[#1e293b] flex items-center px-6 justify-between">
+    <div id="top-global-bar" class="h-14 border-b border-slate-700 bg-[#1e293b] flex items-center px-6 justify-between">
         <div class="flex items-center gap-x-3">
             <div class="flex items-center gap-x-2">
                 <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center">
@@ -257,7 +276,7 @@
     <div class="flex h-[calc(100vh-56px)] overflow-hidden">
         
         <!-- LEFT VERTICAL TABS -->
-        <div class="w-60 bg-[#1e293b] border-r border-slate-700 flex flex-col scrollbar-thin overflow-y-auto">
+        <div id="left-vertical-tabs" class="w-60 bg-[#1e293b] border-r border-slate-700 flex flex-col scrollbar-thin overflow-y-auto">
             <div class="px-4 pt-5 pb-3">
                 <div class="text-[10px] font-bold tracking-[1.5px] text-slate-500 px-3 uppercase">Workflow</div>
             </div>
