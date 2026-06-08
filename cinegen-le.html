@@ -7,22 +7,42 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&amp;family=Space+Grotesk:wght@500;600&amp;display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
         
         :root {
-            --accent-blue: #3b82f6;
-            --bg-panel: #111827;
-            --border-light: #374151;
-            --text-dim: #9ca3af;
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --text-muted: #64748b;
+            --border: #334155;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
         }
         
         body {
-            font-family: 'Inter', system_ui, sans-serif;
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
         }
         
         .font-display {
-            font-family: 'Space Grotesk', 'Inter', sans-serif;
+            font-family: 'Space Grotesk', sans-serif;
             font-weight: 600;
+        }
+
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .glass {
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(51, 65, 85, 0.5);
         }
 
         .cinematic-bg {
@@ -31,45 +51,34 @@
 
         .nav-tab {
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            color: var(--text-secondary);
         }
         
         .nav-tab.active {
-            background-color: #1e2937;
-            border-left: 3px solid #3b82f6;
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
             color: white;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
         }
 
         .top-tab {
             transition: all 0.2s ease;
+            color: var(--text-muted);
+            border-bottom: 2px solid transparent;
         }
         
         .top-tab.active {
-            border-bottom: 3px solid #3b82f6;
-            color: white;
+            border-bottom: 2px solid var(--accent);
+            color: var(--accent);
             font-weight: 600;
         }
 
         .content-area {
-            background-color: #0f172a;
-        }
-        
-        .content-fade {
-            transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
-        }
-        
-        .content-fade.hidden {
-            opacity: 0;
-            transform: translateY(8px);
-        }
-        
-        .content-fade.visible {
-            opacity: 1;
-            transform: translateY(0);
+            background-color: var(--bg-primary);
         }
 
         .location-plan {
-            background: #1e2937;
-            border: 2px solid #475569;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border);
             position: relative;
             overflow: hidden;
         }
@@ -78,7 +87,7 @@
             position: absolute;
             width: 28px;
             height: 28px;
-            background: #3b82f6;
+            background: var(--accent);
             border: 3px solid white;
             border-radius: 50%;
             cursor: move;
@@ -98,12 +107,12 @@
         }
         
         .camera-marker.selected {
-            background: #f59e0b;
+            background: var(--warning);
             box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.3);
         }
 
         .path-line {
-            stroke: #f59e0b;
+            stroke: var(--warning);
             stroke-width: 3;
             stroke-dasharray: 8 4;
             fill: none;
@@ -111,18 +120,26 @@
         }
 
         .path-point {
-            fill: #f59e0b;
+            fill: var(--warning);
             stroke: white;
             stroke-width: 2;
         }
 
-        .character-lock {
-            transition: all 0.2s ease;
+        .panel {
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(51, 65, 85, 0.5);
+            border-radius: 0.75rem;
         }
 
-        .panel {
-            background-color: #111827;
-            border: 1px solid #374151;
+        .card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+            border-color: var(--accent);
         }
 
         .section-header {
@@ -130,7 +147,7 @@
             letter-spacing: 0.5px;
             text-transform: uppercase;
             font-weight: 600;
-            color: #64748b;
+            color: var(--text-muted);
         }
 
         .mock-image {
@@ -138,200 +155,221 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #64748b;
+            color: var(--text-muted);
             font-size: 0.75rem;
         }
 
         .status-bar {
-            background: #0f172a;
-            border-top: 1px solid #334155;
+            background: var(--bg-primary);
+            border-top: 1px solid var(--border);
         }
 
         .entity-card {
-            transition: all 0.2s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
         .entity-card:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
-        }
-        
-        .guidance-banner {
-            background: linear-gradient(135deg, rgba(59,130,246,0.08) 0%, rgba(16,185,129,0.08) 100%);
-            border: 1px solid rgba(59,130,246,0.15);
+            transform: translateY(-2px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+            border-color: var(--accent);
         }
 
-        .inspector-section {
-            transition: all 0.3s ease;
+        .editor-wrap {
+            background: #0b1220;
+            border: 1px solid #1f2a44;
+            border-radius: 0.75rem;
+            overflow: hidden;
         }
+        .editor-toolbar {
+            background: #0f172a;
+            border-bottom: 1px solid #1f2a44;
+        }
+        .editor-textarea {
+            background: transparent;
+            color: #e2e8f0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13.5px;
+            line-height: 1.7;
+            tab-size: 4;
+            resize: none;
+        }
+        .editor-textarea:focus { outline: none; }
+        .line-numbers {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13.5px;
+            line-height: 1.7;
+            color: #475569;
+            user-select: none;
+            text-align: right;
+            padding-right: 1rem;
+        }
+
+        .diff-banner {
+            background: linear-gradient(90deg, rgba(245,158,11,0.15), rgba(245,158,11,0));
+            border: 1px solid rgba(245,158,11,0.4);
+        }
+
+        .scrollbar-thin::-webkit-scrollbar { width:6px; height:6px; }
+        .scrollbar-thin::-webkit-scrollbar-track { background: var(--bg-secondary); }
+        .scrollbar-thin::-webkit-scrollbar-thumb { background: var(--bg-tertiary); border-radius:3px; }
+        .scrollbar-thin::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-200 cinematic-bg min-h-screen">
+<body class="bg-[#0f172a] text-slate-200 cinematic-bg min-h-screen antialiased">
     <!-- Top Global Bar -->
-    <div class="h-14 border-b border-slate-800 bg-slate-900 flex items-center px-6 justify-between">
+    <div class="h-14 border-b border-slate-700 bg-[#1e293b] flex items-center px-6 justify-between">
         <div class="flex items-center gap-x-3">
             <div class="flex items-center gap-x-2">
-                <i class="fa-solid fa-film text-blue-500 text-2xl"></i>
-                <span class="font-display text-2xl font-semibold tracking-tighter">CineGen</span>
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center">
+                    <i class="fa-solid fa-film text-white text-sm"></i>
+                </div>
+                <span class="font-display text-xl font-bold tracking-tight">CineGen</span>
             </div>
-            <div class="px-3 py-1 text-xs bg-slate-800 rounded-full flex items-center gap-x-1.5">
-                <div class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
-                <span class="text-emerald-400 text-xs font-medium">Project: THE LAST SIGNAL</span>
+            <div class="px-3 py-1 text-[10px] bg-slate-800/50 rounded-full flex items-center gap-x-1.5 border border-slate-700">
+                <div class="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></div>
+                <span class="text-emerald-400 font-medium uppercase tracking-wider">Project: THE LAST SIGNAL</span>
             </div>
         </div>
         
         <div class="flex items-center gap-x-4 text-sm">
-            <div id="topbar-readiness" class="flex items-center gap-x-2 text-xs px-3 py-1.5 bg-slate-900 rounded-lg border border-slate-700">
-                <span class="text-slate-400"><span id="topbar-scene-count">12</span> scenes</span>
+            <div class="flex items-center gap-x-2 text-[11px] px-3 py-1.5 bg-slate-900/50 rounded-lg border border-slate-700">
+                <span class="text-slate-400">12 scenes</span>
                 <span class="text-slate-600">•</span>
-                <span class="text-emerald-400"><span id="topbar-readiness-pct">87</span>% ready</span>
+                <span class="text-emerald-400">87% ready</span>
             </div>
             
-            <button onclick="saveProject()"
-                    class="px-4 py-1.5 text-xs font-medium flex items-center gap-x-2 bg-emerald-700 hover:bg-emerald-600 transition-colors rounded-lg border border-emerald-600">
-                <i class="fa-solid fa-floppy-disk text-xs"></i>
-                <span>Save</span>
-            </button>
-            
             <button onclick="showExportModal()"
-                    class="px-4 py-1.5 text-xs font-medium flex items-center gap-x-2 bg-slate-800 hover:bg-slate-700 transition-colors rounded-lg border border-slate-700">
+                    class="px-4 py-1.5 text-xs font-medium flex items-center gap-x-2 bg-blue-600 hover:bg-blue-700 transition-all rounded-lg shadow-lg shadow-blue-500/20">
                 <i class="fa-solid fa-download text-xs"></i>
                 <span>Export</span>
             </button>
             
-            <div class="flex items-center gap-x-2">
-                <img src="https://i.pravatar.cc/24?img=47" class="w-6 h-6 rounded-full ring-2 ring-slate-700" alt="User">
-                <span class="text-xs font-medium">Maya Chen</span>
+            <div class="flex items-center gap-x-2 pl-2 border-l border-slate-700">
+                <img src="https://i.pravatar.cc/24?img=47" class="w-7 h-7 rounded-full ring-2 ring-slate-700" alt="User">
+                <div class="flex flex-col">
+                    <span class="text-[11px] font-semibold leading-none">Maya Chen</span>
+                    <span class="text-[9px] text-slate-500 uppercase tracking-tighter">Director</span>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="flex h-[calc(100vh-56px)]">
+    <div class="flex h-[calc(100vh-56px)] overflow-hidden">
         
         <!-- LEFT VERTICAL TABS -->
-        <div class="w-60 bg-slate-900 border-r border-slate-800 flex flex-col">
+        <div class="w-60 bg-[#1e293b] border-r border-slate-700 flex flex-col scrollbar-thin overflow-y-auto">
             <div class="px-4 pt-5 pb-3">
-                <div class="text-[10px] font-semibold tracking-[1px] text-slate-500 px-3">WORKFLOW</div>
+                <div class="text-[10px] font-bold tracking-[1.5px] text-slate-500 px-3 uppercase">Workflow</div>
             </div>
             
             <div class="px-2 space-y-1">
                 <!-- Left Tabs -->
                 <div onclick="switchLeftTab('script')" id="left-script"
                      class="nav-tab flex items-center gap-x-3 px-4 py-3 text-sm rounded-xl cursor-pointer active">
-                    <i class="fa-solid fa-scroll w-5 text-blue-400"></i>
+                    <i class="fa-solid fa-scroll w-5 text-center"></i>
                     <span class="font-medium">Script</span>
                 </div>
                 
                 <div onclick="switchLeftTab('breakdown')" id="left-breakdown"
-                     class="nav-tab flex items-center gap-x-3 px-4 py-3 text-sm rounded-xl cursor-pointer text-slate-300 hover:bg-slate-800">
-                    <i class="fa-solid fa-list-check w-5 text-emerald-400"></i>
+                     class="nav-tab flex items-center gap-x-3 px-4 py-3 text-sm rounded-xl cursor-pointer text-slate-400 hover:bg-slate-700/50">
+                    <i class="fa-solid fa-list-check w-5 text-center"></i>
                     <span class="font-medium">Breakdown</span>
                 </div>
                 
                 <div onclick="switchLeftTab('entities')" id="left-entities"
-                     class="nav-tab flex items-center gap-x-3 px-4 py-3 text-sm rounded-xl cursor-pointer text-slate-300 hover:bg-slate-800">
-                    <i class="fa-solid fa-users w-5 text-violet-400"></i>
+                     class="nav-tab flex items-center gap-x-3 px-4 py-3 text-sm rounded-xl cursor-pointer text-slate-400 hover:bg-slate-700/50">
+                    <i class="fa-solid fa-cube w-5 text-center"></i>
                     <span class="font-medium">Entities</span>
                 </div>
                 
                 <div onclick="switchLeftTab('beats')" id="left-beats"
-                     class="nav-tab flex items-center gap-x-3 px-4 py-3 text-sm rounded-xl cursor-pointer text-slate-300 hover:bg-slate-800">
-                    <i class="fa-solid fa-timeline w-5 text-amber-400"></i>
+                     class="nav-tab flex items-center gap-x-3 px-4 py-3 text-sm rounded-xl cursor-pointer text-slate-400 hover:bg-slate-700/50">
+                    <i class="fa-solid fa-chart-line w-5 text-center"></i>
                     <span class="font-medium">Beats</span>
                 </div>
                 
                 <div onclick="switchLeftTab('visuals')" id="left-visuals"
-                     class="nav-tab flex items-center gap-x-3 px-4 py-3 text-sm rounded-xl cursor-pointer text-slate-300 hover:bg-slate-800">
-                    <i class="fa-solid fa-images w-5 text-rose-400"></i>
+                     class="nav-tab flex items-center gap-x-3 px-4 py-3 text-sm rounded-xl cursor-pointer text-slate-400 hover:bg-slate-700/50">
+                    <i class="fa-solid fa-palette w-5 text-center"></i>
                     <span class="font-medium">Visuals</span>
                 </div>
                 
                 <div onclick="switchLeftTab('production')" id="left-production"
-                     class="nav-tab flex items-center gap-x-3 px-4 py-3 text-sm rounded-xl cursor-pointer text-slate-300 hover:bg-slate-800">
-                    <i class="fa-solid fa-chart-bar w-5 text-cyan-400"></i>
+                     class="nav-tab flex items-center gap-x-3 px-4 py-3 text-sm rounded-xl cursor-pointer text-slate-400 hover:bg-slate-700/50">
+                    <i class="fa-solid fa-clapperboard w-5 text-center"></i>
                     <span class="font-medium">Production</span>
                 </div>
             </div>
             
-            <div class="mt-auto p-4 border-t border-slate-800">
-                <div class="text-[10px] px-3 text-slate-500">AI Readiness</div>
+            <div class="mt-auto p-4 border-t border-slate-700 bg-slate-900/30">
+                <div class="text-[10px] px-3 text-slate-500 font-bold uppercase tracking-wider">AI Readiness</div>
                 <div class="mt-2 px-3">
-                    <div class="h-1.5 bg-slate-800 rounded-full overflow-hidden">
-                        <div class="h-1.5 bg-gradient-to-r from-blue-500 to-emerald-400 w-[87%]" style="width: 87%"></div>
+                    <div class="h-1.5 bg-slate-800 rounded-full overflow-hidden border border-slate-700/50">
+                        <div class="h-full bg-gradient-to-r from-blue-500 to-emerald-400 w-[87%]" style="width: 87%"></div>
                     </div>
-                    <div class="flex justify-between text-[10px] mt-1 text-slate-400">
-                        <div>87%</div>
-                        <div>Ready for gen</div>
+                    <div class="flex justify-between text-[10px] mt-1.5 font-mono">
+                        <div class="text-blue-400">87%</div>
+                        <div class="text-slate-500 uppercase tracking-tighter">Ready for gen</div>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- MAIN CONTENT AREA -->
-        <div class="flex-1 flex flex-col">
+        <div class="flex-1 flex flex-col overflow-hidden">
             
             <!-- TOP HORIZONTAL TABS -->
-            <div id="top-tabs-container" class="h-14 border-b border-slate-800 bg-slate-900 px-6 flex items-center justify-between">
-                <div id="top-tabs" class="flex items-center gap-x-1 text-sm">
+            <div id="top-tabs-container" class="h-14 border-b border-slate-700 bg-[#1e293b] px-6 flex items-center justify-between shadow-sm">
+                <div id="top-tabs" class="flex items-center gap-x-1 text-sm h-full">
                     <!-- Populated dynamically by JS -->
                 </div>
                 
-                <div class="flex items-center gap-x-2 text-xs">
-                    <div class="px-3 py-1 bg-slate-800 rounded-lg flex items-center gap-x-2 text-slate-400">
+                <div class="flex items-center gap-x-2 text-[11px]">
+                    <div class="px-3 py-1.5 bg-slate-800/50 rounded-lg flex items-center gap-x-2 text-slate-400 border border-slate-700">
                         <i class="fa-solid fa-globe text-emerald-400"></i>
-                        <span>12 references synced</span>
+                        <span class="font-medium">12 references synced</span>
                     </div>
                 </div>
             </div>
 
-            <!-- GUIDANCE BANNER -->
-            <div id="guidance-banner" class="guidance-banner mx-6 mt-3 px-4 py-2 rounded-xl flex items-center gap-x-3 text-xs text-slate-300 hidden">
-                <i class="fa-solid fa-lightbulb text-amber-400"></i>
-                <span id="guidance-text">Next recommended step: Complete location backdrops</span>
-                <button onclick="dismissGuidance()" class="ml-auto text-slate-500 hover:text-white">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-
             <!-- CONTENT AREA -->
-            <div id="main-content" class="flex-1 p-6 overflow-auto">
+            <div id="main-content" class="flex-1 p-6 overflow-y-auto scrollbar-thin bg-[#0f172a]">
                 <!-- Dynamic content injected here by JS -->
             </div>
             
             <!-- STATUS BAR -->
-            <div class="status-bar h-9 px-6 flex items-center justify-between text-xs text-slate-400">
+            <div class="status-bar h-9 px-6 flex items-center justify-between text-[11px] text-slate-400 font-medium">
                 <div class="flex items-center gap-x-4">
-                    <div><span id="footer-scene-count" class="font-mono">42</span> scenes • <span id="footer-char-count" class="font-mono">18</span> characters • <span id="footer-loc-count" class="font-mono">7</span> locations</div>
-                    <div class="text-emerald-400 flex items-center gap-x-1">
-                        <i class="fa-solid fa-check-circle text-xs"></i>
-                        <span id="footer-readiness">Backdrops ready: 6/7</span>
+                    <div><span class="font-mono text-blue-400">42</span> scenes • <span class="font-mono text-blue-400">18</span> characters • <span class="font-mono text-blue-400">7</span> locations</div>
+                    <div class="text-emerald-400 flex items-center gap-x-1 pl-3 border-l border-slate-700">
+                        <i class="fa-solid fa-check-circle text-[10px]"></i>
+                        <span>Backdrops ready: 6/7</span>
                     </div>
                 </div>
                 <div class="flex items-center gap-x-3">
-                    <span id="footer-tab-hint">Script • Editor</span>
-                    <span class="text-slate-600">|</span>
-                    <span>Last sync: just now</span>
-                    <span class="text-slate-600">|</span>
-                    <span id="footer-save-status" class="text-emerald-400">Auto-save</span>
+                    <span class="text-slate-500 uppercase tracking-widest text-[9px]">Last sync: just now</span>
+                    <span class="text-slate-700">•</span>
+                    <span class="text-emerald-500/80 uppercase tracking-widest text-[9px]">Auto-save enabled</span>
                 </div>
             </div>
         </div>
 
         <!-- RIGHT INSPECTOR -->
-        <div class="w-72 border-l border-slate-800 bg-slate-900 p-4 hidden lg:block">
-            <div class="text-xs font-semibold text-slate-400 mb-3 px-1">INSPECTOR</div>
+        <div class="w-72 border-l border-slate-700 bg-[#1e293b] p-4 hidden lg:block scrollbar-thin overflow-y-auto">
+            <div class="text-[10px] font-bold text-slate-500 mb-4 px-1 uppercase tracking-widest">Inspector</div>
             
             <div id="right-inspector" class="space-y-4">
                 <!-- Populated dynamically -->
-                <div class="text-center py-8 text-slate-500 text-xs">
-                    Select an item to inspect
+                <div class="text-center py-12 text-slate-600">
+                    <i class="fa-solid fa-mouse-pointer text-2xl mb-3 opacity-20"></i>
+                    <p class="text-[11px] uppercase tracking-tighter">Select an item to inspect</p>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Toast / Alert -->
-    <div id="toast" class="hidden fixed bottom-6 right-6 bg-slate-800 border border-slate-700 text-sm px-4 py-3 rounded-2xl flex items-center gap-x-3 shadow-xl">
+    <div id="toast" class="hidden fixed bottom-6 right-6 bg-slate-800 border border-slate-700 text-sm px-4 py-3 rounded-xl flex items-center gap-x-3 shadow-xl">
         <i class="fa-solid fa-check text-emerald-400"></i>
         <span id="toast-text"></span>
     </div>
@@ -347,13 +385,16 @@
         let selectedLocation = null;
         let selectedMarker = null;
         let cameraMarkers = [];
+        let lastSyncHash = '';
+
+        function hash(str){ let h=0; for(let i=0;i<str.length;i++){h=((h<<5)-h)+str.charCodeAt(i);h|=0} return h.toString(16); }
 
         // Mock data
         const mockData = {
             locations: [
-                { id: 1, name: "Rooftop Observatory", scenes: "1, 4, 12", backdrops: 4, hasGuide: true },
-                { id: 2, name: "Abandoned Subway Station", scenes: "7, 8", backdrops: 3, hasGuide: true },
-                { id: 3, name: "Neon Alley", scenes: "2, 5, 9", backdrops: 5, hasGuide: false },
+                { id: 1, name: "Rooftop Observatory", scenes: "1, 4, 12", backdrops: 4, hasGuide: true, readiness: 85 },
+                { id: 2, name: "Abandoned Subway Station", scenes: "7, 8", backdrops: 3, hasGuide: true, readiness: 60 },
+                { id: 3, name: "Neon Alley", scenes: "2, 5, 9", backdrops: 5, hasGuide: false, readiness: 35 },
             ],
             characters: [
                 { 
@@ -362,7 +403,8 @@
                     description: "Brilliant astrophysicist, 38, determined and introspective", 
                     locked: true, 
                     lockStrength: 85,
-                    references: 4 
+                    references: 4,
+                    readiness: 90
                 },
                 { 
                     id: 2, 
@@ -370,7 +412,8 @@
                     description: "Ex-military, 42, skeptical and grounded", 
                     locked: false, 
                     lockStrength: 60,
-                    references: 2 
+                    references: 2,
+                    readiness: 45
                 },
                 { 
                     id: 3, 
@@ -378,7 +421,8 @@
                     description: "Mysterious alien entity — abstract visual presence", 
                     locked: true, 
                     lockStrength: 92,
-                    references: 7 
+                    references: 7,
+                    readiness: 75
                 }
             ],
             scenes: [
@@ -397,25 +441,26 @@
                 ]
             },
             currentShot: null,     // The shot currently loaded in the Shot Composer
-            scratchShots: []       // User-created custom shots for scratchpad
+            scratchShots: [],       // User-created custom shots for scratchpad
+            scriptText: `INT. ROOFTOP OBSERVATORY - NIGHT
+
+The city stretches below like scattered diamonds. Dr. Elena Voss stands at the telescope, wind whipping her coat.
+
+ELENA
+The signal's getting stronger. It's not random.
+
+She turns as a shadow falls across the observatory floor.`
         };
 
-        let activeCameraPath = null;
+        function getReadinessBadge(percent) {
+            let colorClass = 'bg-red-500/20 text-red-400 border-red-500/20';
+            if (percent >= 70) colorClass = 'bg-green-500/20 text-green-400 border-green-500/20';
+            else if (percent >= 40) colorClass = 'bg-yellow-500/20 text-yellow-400 border-yellow-500/20';
+            
+            return `<div class="px-2 py-0.5 ${colorClass} rounded-full text-[10px] font-bold uppercase tracking-wider border">${percent}% Ready</div>`;
+        }
 
-const workflowData = {
-    outline:[
-        {scene:"1",title:"Observatory Discovery",status:"synced"},
-        {scene:"2",title:"Neon Alley Investigation",status:"draft"}
-    ],
-    props:["Signal Receiver","Military Radio","Research Tablet"],
-    wardrobe:["Night Coat","Field Jacket","Observatory Uniform"],
-    storyboard:[
-        {shot:"1A",status:"Draft"},
-        {shot:"1B",status:"Approved"},
-        {shot:"1C",status:"Draft"}
-    ]
-};
- // { type: 'dolly' | 'orbit' | 'pan', points: [...] }
+        let activeCameraPath = null; // { type: 'dolly' | 'orbit' | 'pan', points: [...] }
 
         function showToast(message) {
             const toast = document.getElementById('toast');
@@ -426,6 +471,30 @@ const workflowData = {
             setTimeout(() => {
                 toast.style.display = 'none';
             }, 2200);
+        }
+
+        function handleScriptInput(textarea) {
+            mockData.scriptText = textarea.value;
+            updateLineNumbers();
+            
+            const banner = document.getElementById('diff-banner');
+            if (banner && lastSyncHash) {
+                if (hash(textarea.value) !== lastSyncHash) {
+                    banner.classList.remove('hidden');
+                } else {
+                    banner.classList.add('hidden');
+                }
+            }
+        }
+
+        function updateLineNumbers() {
+            const ta = document.getElementById('script-editor');
+            const lineNums = document.getElementById('line-numbers');
+            if (!ta || !lineNums) return;
+            
+            const lines = ta.value.split('\n').length;
+            const nums = Array.from({length: lines}, (_,i)=>i+1).join('\n');
+            lineNums.textContent = nums;
         }
 
         function switchLeftTab(tab) {
@@ -441,6 +510,16 @@ const workflowData = {
 
             currentLeftTab = tab;
             
+            // Set default top tab for this left tab
+            switch(tab) {
+                case 'script': currentTopTab = 'editor'; break;
+                case 'breakdown': currentTopTab = 'all'; break;
+                case 'entities': currentTopTab = 'locations'; break;
+                case 'beats': currentTopTab = 'timeline'; break;
+                case 'visuals': currentTopTab = 'shot-composer'; break;
+                case 'production': currentTopTab = 'dashboard'; break;
+            }
+
             // Render appropriate content + top tabs
             renderTopTabs(tab);
             renderMainContent(tab);
@@ -459,7 +538,6 @@ const workflowData = {
                         { id: 'outline', label: 'Outline' },
                         { id: 'parse', label: 'Parse & Sync' }
                     ];
-                    currentTopTab = 'editor';
                     break;
                     
                 case 'breakdown':
@@ -469,7 +547,6 @@ const workflowData = {
                         { id: 'annotate', label: 'Auto-Annotate' },
                         { id: 'readiness', label: 'Readiness' }
                     ];
-                    currentTopTab = 'all';
                     break;
                     
                 case 'entities':
@@ -479,7 +556,6 @@ const workflowData = {
                         { id: 'props', label: 'Props' },
                         { id: 'wardrobe', label: 'Wardrobe' }
                     ];
-                    currentTopTab = 'characters'; // default to Characters now that locking is added
                     break;
                     
                 case 'beats':
@@ -488,7 +564,6 @@ const workflowData = {
                         { id: 'treatment', label: 'Treatment' },
                         { id: 'import', label: 'Import Script' }
                     ];
-                    currentTopTab = 'timeline';
                     break;
                     
                 case 'visuals':
@@ -498,7 +573,6 @@ const workflowData = {
                         { id: 'storyboard', label: 'Storyboard' },
                         { id: 'shot-composer', label: 'Shot Composer' }
                     ];
-                    currentTopTab = 'shot-composer';
                     break;
                     
                 case 'production':
@@ -508,7 +582,6 @@ const workflowData = {
                         { id: 'drafts', label: 'Drafts' },
                         { id: 'export', label: 'Export' }
                     ];
-                    currentTopTab = 'dashboard';
                     break;
             }
             
@@ -516,9 +589,9 @@ const workflowData = {
                 const btn = document.createElement('button');
                 btn.className = `top-tab px-5 py-2 text-sm font-medium rounded-t-lg transition-colors ${tab.id === currentTopTab ? 'active text-white border-b-2 border-blue-500' : 'text-slate-400 hover:text-slate-200'}`;
                 btn.textContent = tab.label;
+                btn.dataset.tabId = tab.id;
                 btn.onclick = () => {
                     currentTopTab = tab.id;
-                    // Re-render top tabs to update active state
                     renderTopTabs(currentLeftTab);
                     renderMainContent(currentLeftTab);
                 };
@@ -534,88 +607,152 @@ const workflowData = {
             
             switch(leftTab) {
                 case 'script':
+                    const isDiff = lastSyncHash && hash(mockData.scriptText) !== lastSyncHash;
                     html = `
-                        <div class="max-w-5xl mx-auto">
-                            <div class="flex items-center justify-between mb-4">
+                        <div class="max-w-6xl mx-auto">
+                            <div class="flex items-center justify-between mb-6">
                                 <div>
-                                    <h2 class="font-semibold text-xl">Script Editor</h2>
-                                    <p class="text-xs text-slate-400">Fountain syntax • Auto-parsed entities</p>
+                                    <h2 class="font-display text-2xl font-bold mb-1">Script Editor</h2>
+                                    <p class="text-xs text-slate-400 uppercase tracking-widest">Fountain syntax • Auto-parsed entities</p>
                                 </div>
                                 <div class="flex gap-x-2">
-                                    <button onclick="simulateParse()" class="px-4 py-2 text-xs flex items-center gap-x-2 bg-blue-600 hover:bg-blue-700 transition-colors rounded-lg text-white text-sm">
+                                    <button onclick="simulateParse()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 transition-all rounded-lg text-white text-xs font-semibold shadow-lg shadow-blue-500/20 flex items-center gap-2">
                                         <i class="fa-solid fa-sync fa-sm"></i>
                                         <span>Parse & Sync Entities</span>
                                     </button>
                                 </div>
                             </div>
+
+                            <div id="diff-banner" class="diff-banner ${isDiff ? '' : 'hidden'} mb-6 rounded-xl p-4 flex items-center justify-between border border-amber-500/30">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center">
+                                        <i class="fas fa-code-branch text-amber-500"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-bold text-amber-400 uppercase tracking-tight">Script changed since last sync</p>
+                                        <p class="text-[11px] text-amber-200/60 font-medium">Entities, breakdown and boards may be out of date.</p>
+                                    </div>
+                                </div>
+                                <button onclick="simulateParse()" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-slate-900 rounded-lg text-[11px] font-bold uppercase tracking-wider transition-colors shadow-lg shadow-amber-500/10">
+                                    Sync Now
+                                </button>
+                            </div>
                             
-                            <div class="panel p-6 rounded-2xl border border-slate-700">
-                                <div class="font-mono text-xs leading-relaxed text-slate-300 whitespace-pre-line">
-INT. ROOFTOP OBSERVATORY - NIGHT
+                            <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                                <!-- Editor -->
+                                <div class="xl:col-span-2 editor-wrap shadow-2xl">
+                                    <div class="editor-toolbar px-4 py-2 flex items-center justify-between">
+                                        <div class="flex items-center gap-3">
+                                            <span class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Screenplay.fdx</span>
+                                            <span class="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded text-[9px] font-bold uppercase tracking-tighter">Parsed</span>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <button class="w-7 h-7 rounded hover:bg-slate-800 flex items-center justify-center text-slate-500 transition-colors"><i class="fas fa-search fa-xs"></i></button>
+                                            <button class="w-7 h-7 rounded hover:bg-slate-800 flex items-center justify-center text-slate-500 transition-colors"><i class="fas fa-ellipsis fa-xs"></i></button>
+                                        </div>
+                                    </div>
+                                    <div class="flex bg-[#0b1220]">
+                                        <div id="line-numbers" class="line-numbers pl-4 py-4 w-12 bg-[#0b1220] border-r border-slate-800/50">1</div>
+                                        <textarea id="script-editor" 
+                                                  oninput="handleScriptInput(this)"
+                                                  class="editor-textarea flex-1 p-4 h-[500px] scrollbar-thin focus:outline-none"
+                                                  placeholder="Start writing your screenplay...">${mockData.scriptText}</textarea>
+                                    </div>
+                                </div>
 
-The city stretches below like scattered diamonds. Dr. Elena Voss stands at the telescope, wind whipping her coat.
+                                <!-- Sidebar Stats/Outline -->
+                                <div class="space-y-6">
+                                    <div class="panel p-5 card-hover">
+                                        <h3 class="font-display font-bold text-sm uppercase tracking-wider mb-4 border-b border-slate-700/50 pb-2">Parsed Outline</h3>
+                                        <div class="space-y-3">
+                                            <div class="flex items-center gap-3 group cursor-pointer">
+                                                <div class="w-6 h-6 rounded bg-slate-800 flex items-center justify-center text-[10px] font-mono text-blue-400 group-hover:bg-blue-600 group-hover:text-white transition-colors">1</div>
+                                                <span class="text-xs text-slate-300 group-hover:text-white transition-colors">Observatory Discovery</span>
+                                            </div>
+                                            <div class="flex items-center gap-3 group cursor-pointer">
+                                                <div class="w-6 h-6 rounded bg-slate-800 flex items-center justify-center text-[10px] font-mono text-slate-500 group-hover:bg-blue-600 group-hover:text-white transition-colors">2</div>
+                                                <span class="text-xs text-slate-400 group-hover:text-white transition-colors">Neon Alley Investigation</span>
+                                            </div>
+                                        </div>
+                                    </div>
 
-ELENA
-The signal's getting stronger. It's not random.
-
-She turns as a shadow falls across the observatory floor.
+                                    <div class="panel p-5 card-hover">
+                                        <h3 class="font-display font-bold text-sm uppercase tracking-wider mb-3 border-b border-slate-700/50 pb-2">Script Stats</h3>
+                                        <div class="grid grid-cols-2 gap-3 text-center">
+                                            <div class="bg-slate-900/50 border border-slate-700/30 rounded-xl p-3">
+                                                <div class="text-xl font-display font-bold text-blue-400">1</div>
+                                                <div class="text-[9px] text-slate-500 uppercase tracking-widest font-bold">Pages</div>
+                                            </div>
+                                            <div class="bg-slate-900/50 border border-slate-700/30 rounded-xl p-3">
+                                                <div class="text-xl font-display font-bold text-blue-400">2</div>
+                                                <div class="text-[9px] text-slate-500 uppercase tracking-widest font-bold">Scenes</div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             
-                            
-    <div class="grid grid-cols-2 gap-4 mt-4">
-      <div class="panel p-4 rounded-2xl">
-        <div class="section-header mb-2">Parsed Outline</div>
-        <div class="text-sm">Scene 1 • Observatory Discovery</div>
-        <div class="text-sm">Scene 2 • Neon Alley Investigation</div>
-      </div>
-      <div class="panel p-4 rounded-2xl">
-        <div class="section-header mb-2">Sync Targets</div>
-        <div class="text-xs text-slate-400">Characters, Locations, Props, Storyboard and Shot Composer update from parsing.</div>
-      </div>
-    </div>
-    <div class="mt-3 text-xs text-emerald-400 flex items-center gap-x-2">
-    
+                            <div class="mt-4 text-[11px] text-emerald-400 flex items-center gap-x-2 font-medium bg-emerald-500/5 border border-emerald-500/10 px-4 py-2 rounded-xl w-fit">
                                 <i class="fa-solid fa-check-circle"></i>
                                 <span>18 entities detected • 3 new locations added to project</span>
                             </div>
                         </div>
-                    <div class="panel p-5 rounded-2xl mt-5">
-                        <div class="section-header mb-2">Cross-System Status</div>
-                        <div class="text-sm">✓ Script Parsed</div>
-                        <div class="text-sm">✓ Characters Synced</div>
-                        <div class="text-sm">✓ Locations Synced</div>
-                        <div class="text-sm">• Storyboard Pending Review</div>
-                    </div>
                     `;
                     break;
                     
                 case 'breakdown':
                     html = `
-                        <div>
-                            <h2 class="font-semibold text-xl mb-1">Breakdown</h2>
-                            <p class="text-sm text-slate-400 mb-5">Scene-by-scene element extraction</p>
+                        <div class="max-w-6xl">
+                            <h2 class="font-semibold text-2xl mb-1">Breakdown</h2>
+                            <p class="text-sm text-slate-400 mb-5">Scene-by-scene element extraction • Auto-tagged from script + manual overrides</p>
                             
-                            <div class="panel p-4 rounded-2xl mb-4"><div class="font-semibold">Workflow Exchange</div><div class="text-xs text-slate-400">Breakdown results feed Entities, Storyboard and Production scheduling.</div></div><div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="space-y-6">
                                 ${mockData.scenes.map(scene => `
-                                    <div class="panel p-4 rounded-2xl">
-                                        <div class="flex justify-between items-start">
+                                    <div class="panel p-6 card-hover">
+                                        <div class="flex justify-between items-start mb-4">
                                             <div>
-                                                <div class="font-mono text-sm font-semibold">Scene ${scene.number}</div>
-                                                <div class="text-xs text-slate-400">${scene.heading}</div>
+                                                <div class="font-mono text-lg font-semibold">Scene ${scene.number}</div>
+                                                <div class="text-sm text-slate-300">${scene.heading}</div>
                                             </div>
-                                            <div class="text-xs px-2.5 py-0.5 rounded-full ${scene.status === 'ready' ? 'bg-emerald-900 text-emerald-400' : 'bg-amber-900 text-amber-400'}">
-                                                ${scene.status}
-                                            </div>
-                                        </div>
-                                        <div class="mt-4 text-xs">
-                                            <div class="flex items-center justify-between text-slate-400">
-                                                <div>Location</div>
-                                                <div class="font-medium text-white">${scene.location}</div>
+                                            <div class="text-xs px-3 py-1 rounded-full ${scene.status === 'ready' ? 'bg-emerald-900 text-emerald-400' : 'bg-amber-900 text-amber-400'}">
+                                                ${scene.status === 'ready' ? 'Ready for Production' : 'Needs Assets'}
                                             </div>
                                         </div>
-                                        <div class="mt-4 pt-3 border-t border-slate-700 flex gap-x-2 text-xs">
-                                            <button onclick="showToast('Location guide opened')" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg">View Location Guide</button>
+                                        
+                                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                                            <!-- Characters -->
+                                            <div>
+                                                <div class="font-semibold text-emerald-400 mb-2">CHARACTERS</div>
+                                                <div class="space-y-1">
+                                                    <div class="flex justify-between bg-slate-800 px-3 py-1.5 rounded"><span>Dr. Elena Voss</span> <span class="text-emerald-400">Main</span></div>
+                                                    <div class="flex justify-between bg-slate-800 px-3 py-1.5 rounded"><span>Marcus Hale</span> <span class="text-slate-400">Supporting</span></div>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Props & Wardrobe -->
+                                            <div>
+                                                <div class="font-semibold text-violet-400 mb-2">PROPS & WARDROBE</div>
+                                                <div class="space-y-1 text-xs">
+                                                    <div class="flex justify-between bg-slate-800 px-3 py-1.5 rounded">Telescope • Vintage</div>
+                                                    <div class="flex justify-between bg-slate-800 px-3 py-1.5 rounded">Dr. Voss Coat (Leather, dark)</div>
+                                                    <div class="flex justify-between bg-slate-800 px-3 py-1.5 rounded">Signal Device (VFX)</div>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- SFX / VFX / Time -->
+                                            <div>
+                                                <div class="font-semibold text-amber-400 mb-2">SFX / VFX / TIME</div>
+                                                <div class="space-y-1 text-xs">
+                                                    <div class="flex justify-between bg-slate-800 px-3 py-1.5 rounded">Wind (practical + SFX)</div>
+                                                    <div class="flex justify-between bg-slate-800 px-3 py-1.5 rounded">Golden Hour lighting</div>
+                                                    <div class="flex justify-between bg-slate-800 px-3 py-1.5 rounded">City lights (VFX plates)</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="mt-5 pt-4 border-t border-slate-700 flex gap-x-3 text-xs">
+                                            <button onclick="showToast('Location guide opened in Entities')" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-xl">Open Location Guide</button>
+                                            <button onclick="showToast('Shot list opened')" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-xl text-white">Open in Shot Composer</button>
                                         </div>
                                     </div>
                                 `).join('')}
@@ -629,22 +766,17 @@ She turns as a shadow falls across the observatory floor.
                         html = renderLocationsView();
                     } else if (currentTopTab === 'characters') {
                         html = renderCharactersView();
+                    } else if (currentTopTab === 'props') {
+                        html = renderPropsView();
+                    } else if (currentTopTab === 'wardrobe') {
+                        html = renderWardrobeView();
                     } else {
                         html = `
                             <div>
                                 <h2 class="text-xl font-semibold mb-4">Entities — ${currentTopTab}</h2>
                                 <div class="text-center py-12 text-slate-500 text-sm">
-                                    <div class='grid grid-cols-2 gap-4 mt-4'>
-        <div class='panel p-4 rounded-2xl'>
-            <div class='font-semibold mb-2'>Production Assets</div>
-            <div class='text-xs text-slate-400'>Shared with Script, Breakdown and Shot Composer.</div>
-            <ul class='mt-3 text-sm'><li>• Signal Receiver</li><li>• Research Tablet</li><li>• Telescope Assembly</li></ul>
-        </div>
-        <div class='panel p-4 rounded-2xl'>
-            <div class='font-semibold mb-2'>Continuity Tracking</div>
-            <div class='text-xs text-slate-400'>Wardrobe and prop state persist between scenes.</div>
-        </div>
-    </div>
+                                    ${currentTopTab} view coming soon in full app.<br>
+                                    <span class="text-xs">(Demo focuses on Locations + Camera + Lighting + Character Locking)</span>
                                 </div>
                             </div>
                         `;
@@ -653,16 +785,26 @@ She turns as a shadow falls across the observatory floor.
                     
                 case 'beats':
                     html = `
-                        <div class="max-w-4xl">
-                            <h2 class="font-semibold text-xl mb-1">Beat Timeline</h2>
-                            <p class="text-sm text-slate-400 mb-6">Narrative structure with emotional arcs</p>
+                        <div class="max-w-5xl">
+                            <h2 class="font-display text-2xl font-bold mb-1">Beat Timeline</h2>
+                            <p class="text-sm text-slate-400 mb-6">Narrative structure with emotional arcs • Linked to scenes & characters</p>
                             
-                            <div class="flex gap-x-3 overflow-x-auto pb-4">
-                                ${['Inciting Incident', 'First Act Climax', 'Midpoint', 'Dark Night', 'Climax'].map((beat, i) => `
-                                    <div class="min-w-[170px] panel p-4 rounded-2xl border-l-4 ${i === 2 ? 'border-amber-500' : 'border-slate-600'}">
-                                        <div class="text-xs text-slate-400">Beat ${i+1}</div>
-                                        <div class="font-semibold mt-1">${beat}</div>
-                                        <div class="mt-3 text-[10px] px-2 py-0.5 inline-block bg-slate-800 rounded">Emotional: Growth</div>
+                            <div class="flex gap-x-4 overflow-x-auto pb-6 scrollbar-thin">
+                                ${[
+                                    {name: "Inciting Incident", emotion: "Growth", scene: "1"},
+                                    {name: "First Act Climax", emotion: "Connection", scene: "4"},
+                                    {name: "Midpoint", emotion: "Center", scene: "7"},
+                                    {name: "Dark Night", emotion: "Depth", scene: "9"},
+                                    {name: "Climax", emotion: "Release", scene: "12"}
+                                ].map((beat, i) => `
+                                    <div class="min-w-[200px] panel p-5 card-hover border-l-4 border-l-amber-500">
+                                        <div class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Beat ${i+1}</div>
+                                        <div class="font-display font-bold mt-1 text-lg">${beat.name}</div>
+                                        <div class="mt-3 text-[10px] flex justify-between items-center">
+                                            <span class="px-2 py-0.5 bg-slate-800/50 border border-slate-700 rounded font-bold uppercase tracking-tighter text-slate-400">${beat.emotion}</span>
+                                            <span class="text-emerald-400 font-mono">Scene ${beat.scene}</span>
+                                        </div>
+                                        <button onclick="showToast('Beat detail opened')" class="mt-5 w-full py-2 text-[10px] font-bold uppercase tracking-widest bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors border border-slate-700">Edit Beat</button>
                                     </div>
                                 `).join('')}
                             </div>
@@ -676,10 +818,11 @@ She turns as a shadow falls across the observatory floor.
                     } else {
                         html = `
                             <div class="max-w-3xl">
-                                <h2 class="font-semibold text-xl">Visuals — ${currentTopTab}</h2>
-                                <div class="mt-8 text-center text-sm text-slate-400">
-                                    Mood Board and References views available in full build.<br>
-                                    Current demo emphasizes Storyboard + Shot Composer.
+                                <h2 class="font-display text-2xl font-bold mb-1">Visuals — ${currentTopTab}</h2>
+                                <div class="mt-12 text-center text-sm text-slate-500">
+                                    <i class="fa-solid fa-palette text-4xl mb-4 opacity-20"></i>
+                                    <p class="uppercase tracking-widest text-[11px] font-bold">Mood Board and References views available in full build.</p>
+                                    <p class="text-[10px] mt-2 text-slate-600">Current demo emphasizes Storyboard + Shot Composer.</p>
                                 </div>
                             </div>
                         `;
@@ -689,23 +832,23 @@ She turns as a shadow falls across the observatory floor.
                 case 'production':
                     html = `
                         <div>
-                            <h2 class="text-xl font-semibold">Production Dashboard</h2>
-                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-5">
-                                <div class="panel p-5 rounded-2xl">
-                                    <div class="text-xs text-slate-400">Scenes</div>
-                                    <div class="text-4xl font-semibold mt-1">42</div>
+                            <h2 class="font-display text-2xl font-bold mb-1">Production Dashboard</h2>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+                                <div class="panel p-5 card-hover">
+                                    <div class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Scenes</div>
+                                    <div class="text-4xl font-display font-bold mt-2 text-blue-400">42</div>
                                 </div>
-                                <div class="panel p-5 rounded-2xl">
-                                    <div class="text-xs text-slate-400">Backdrops Ready</div>
-                                    <div class="text-4xl font-semibold mt-1 text-emerald-400">6<span class="text-lg align-super">/7</span></div>
+                                <div class="panel p-5 card-hover">
+                                    <div class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Backdrops Ready</div>
+                                    <div class="text-4xl font-display font-bold mt-2 text-emerald-400">6<span class="text-lg align-super text-slate-600">/7</span></div>
                                 </div>
-                                <div class="panel p-5 rounded-2xl">
-                                    <div class="text-xs text-slate-400">Camera Setups</div>
-                                    <div class="text-4xl font-semibold mt-1">31</div>
+                                <div class="panel p-5 card-hover">
+                                    <div class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Camera Setups</div>
+                                    <div class="text-4xl font-display font-bold mt-2 text-amber-400">31</div>
                                 </div>
-                                <div class="panel p-5 rounded-2xl">
-                                    <div class="text-xs text-slate-400">AI Generations</div>
-                                    <div class="text-4xl font-semibold mt-1">184</div>
+                                <div class="panel p-5 card-hover">
+                                    <div class="text-[10px] font-bold uppercase tracking-widest text-slate-500">AI Generations</div>
+                                    <div class="text-4xl font-display font-bold mt-2 text-violet-400">184</div>
                                 </div>
                             </div>
                         </div>
@@ -716,6 +859,10 @@ She turns as a shadow falls across the observatory floor.
             content.innerHTML = html;
             
             // Re-attach interactivity for certain views
+            if (leftTab === 'script') {
+                updateLineNumbers();
+            }
+
             if (leftTab === 'entities' && currentTopTab === 'locations') {
                 attachLocationListeners();
             }
@@ -730,10 +877,10 @@ She turns as a shadow falls across the observatory floor.
                 <div class="max-w-5xl">
                     <div class="flex items-end justify-between mb-6">
                         <div>
-                            <h2 class="font-semibold text-2xl">Characters</h2>
+                            <h2 class="font-display text-2xl font-bold mb-1">Characters</h2>
                             <p class="text-sm text-slate-400">Lock characters for consistent AI generation across shots</p>
                         </div>
-                        <button onclick="addNewCharacter()" class="flex items-center gap-x-2 px-4 py-2 text-sm bg-white text-slate-900 rounded-2xl font-medium hover:bg-slate-100 transition-colors">
+                        <button onclick="addNewCharacter()" class="flex items-center gap-x-2 px-4 py-2 text-sm bg-white text-slate-900 rounded-xl font-medium hover:bg-slate-100 transition-colors">
                             <i class="fa-solid fa-plus"></i>
                             <span>New Character</span>
                         </button>
@@ -741,32 +888,33 @@ She turns as a shadow falls across the observatory floor.
 
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         ${mockData.characters.map(char => `
-                            <div class="panel p-5 rounded-3xl border border-slate-700">
+                            <div class="panel p-5 card-hover">
                                 <div class="flex justify-between items-start">
                                     <div>
                                         <div class="font-semibold text-lg">${char.name}</div>
                                         <div class="text-xs text-slate-400 mt-0.5 line-clamp-2">${char.description}</div>
                                     </div>
-                                    <div class="text-right">
-                                        <div class="text-xs px-2.5 py-0.5 rounded-full ${char.locked ? 'bg-emerald-900 text-emerald-300' : 'bg-slate-700 text-slate-300'}">
+                                    <div class="text-right flex flex-col items-end gap-1.5">
+                                        <div class="text-[10px] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider ${char.locked ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/20' : 'bg-slate-700/50 text-slate-400 border border-slate-700/50'}">
                                             ${char.locked ? 'LOCKED' : 'Unlocked'}
                                         </div>
+                                        ${getReadinessBadge(char.readiness)}
                                     </div>
                                 </div>
 
                                 <div class="mt-5">
                                     <div class="flex items-center justify-between text-xs mb-1.5">
-                                        <span class="text-slate-400">Lock Strength</span>
+                                        <span class="text-slate-500 uppercase tracking-widest font-bold text-[9px]">Lock Strength</span>
                                         <span class="font-mono text-emerald-400">${char.lockStrength}%</span>
                                     </div>
                                     
                                     <input type="range" 
                                            min="0" max="100" step="5" 
                                            value="${char.lockStrength}"
-                                           class="w-full accent-emerald-500"
+                                           class="w-full accent-emerald-500 h-1 bg-slate-700 rounded-lg appearance-none cursor-pointer"
                                            onchange="updateCharacterLock(${char.id}, this.value)">
                                     
-                                    <div class="flex justify-between text-[10px] text-slate-500 mt-0.5">
+                                    <div class="flex justify-between text-[9px] text-slate-500 mt-1 uppercase font-bold tracking-tighter">
                                         <div>Loose</div>
                                         <div>Strict</div>
                                     </div>
@@ -774,19 +922,19 @@ She turns as a shadow falls across the observatory floor.
 
                                 <div class="mt-4 flex items-center justify-between text-xs">
                                     <div class="flex items-center gap-x-2">
-                                        <span class="text-slate-400">${char.references} refs</span>
+                                        <span class="text-slate-500 font-mono text-[10px]">${char.references} refs</span>
                                     </div>
                                     
                                     <button onclick="toggleCharacterLock(${char.id}, event)" 
-                                            class="px-4 py-1.5 text-xs rounded-2xl transition-colors ${char.locked ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'bg-slate-700 hover:bg-slate-600'}">
-                                        ${char.locked ? 'Unlock Character' : 'Lock Character'}
+                                            class="px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider rounded-lg transition-colors ${char.locked ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'bg-slate-700 hover:bg-slate-600 text-slate-300'}">
+                                        ${char.locked ? 'Unlock' : 'Lock'}
                                     </button>
                                 </div>
                             </div>
                         `).join('')}
                     </div>
 
-                    <div class="mt-8 panel p-5 rounded-2xl text-xs text-slate-400">
+                    <div class="mt-8 panel p-5 card-hover text-xs text-slate-400">
                         <strong class="text-emerald-400">How Character Locking Works:</strong><br>
                         When locked, this character reference is automatically injected into every generation with the chosen strength. 
                         This ensures visual consistency across shots — a core requirement for professional AI filmmaking tools.
@@ -800,10 +948,10 @@ She turns as a shadow falls across the observatory floor.
                 <div class="max-w-[1200px]">
                     <div class="flex items-end justify-between mb-5">
                         <div>
-                            <h2 class="font-semibold text-2xl">Locations</h2>
+                            <h2 class="font-display text-2xl font-bold mb-1">Locations</h2>
                             <p class="text-sm text-slate-400">Manage backdrops, camera positions & lighting — critical for AI generation</p>
                         </div>
-                        <button onclick="addNewLocation()" class="flex items-center gap-x-2 px-4 py-2 text-sm bg-white text-slate-900 rounded-2xl font-medium hover:bg-slate-100 transition-colors">
+                        <button onclick="addNewLocation()" class="flex items-center gap-x-2 px-4 py-2 text-sm bg-white text-slate-900 rounded-xl font-medium hover:bg-slate-100 transition-colors">
                             <i class="fa-solid fa-plus"></i>
                             <span>New Location</span>
                         </button>
@@ -812,18 +960,19 @@ She turns as a shadow falls across the observatory floor.
                     <div class="flex gap-6">
                         <!-- Location Library -->
                         <div class="w-72 flex-shrink-0">
-                            <div class="section-header mb-3 px-1">LIBRARY</div>
+                            <div class="section-header mb-3 px-1">Library</div>
                             <div class="space-y-2">
                                 ${mockData.locations.map(loc => `
-                                    <div onclick="selectLocation(${loc.id})" class="entity-card cursor-pointer panel p-4 rounded-2xl flex justify-between items-center ${selectedLocation && selectedLocation.id === loc.id ? 'ring-2 ring-blue-500' : ''}">
+                                    <div onclick="selectLocation(${loc.id})" class="entity-card cursor-pointer panel p-4 card-hover flex justify-between items-center ${selectedLocation && selectedLocation.id === loc.id ? 'border-blue-500 ring-1 ring-blue-500/50' : ''}">
                                         <div>
-                                            <div class="font-semibold">${loc.name}</div>
-                                            <div class="text-xs text-slate-400">Scenes: ${loc.scenes}</div>
+                                            <div class="font-semibold text-sm">${loc.name}</div>
+                                            <div class="text-[10px] text-slate-500 uppercase tracking-wider font-bold">Scenes: ${loc.scenes}</div>
                                         </div>
-                                        <div class="text-right">
-                                            <div class="text-xs px-2 py-px rounded-full ${loc.hasGuide ? 'bg-emerald-900 text-emerald-300' : 'bg-amber-900 text-amber-300'}">
+                                        <div class="text-right flex flex-col items-end gap-1.5">
+                                            <div class="text-[9px] px-2 py-0.5 rounded-full font-bold uppercase tracking-tighter ${loc.hasGuide ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'}">
                                                 ${loc.backdrops} backdrops
                                             </div>
+                                            ${getReadinessBadge(loc.readiness)}
                                         </div>
                                     </div>
                                 `).join('')}
@@ -832,20 +981,20 @@ She turns as a shadow falls across the observatory floor.
                         
                         <!-- Main Workspace: Plan View + Controls -->
                         <div class="flex-1">
-                            <div class="panel rounded-3xl p-5 border border-slate-700">
+                            <div class="panel p-5 card-hover">
                                 <div class="flex justify-between items-center mb-3 px-1">
                                     <div>
-                                        <span class="font-semibold">Plan View</span>
-                                        <span id="current-location-name" class="ml-3 text-xs px-3 py-px bg-slate-800 text-slate-300 rounded-full">Select a location</span>
+                                        <span class="font-display font-bold text-sm uppercase tracking-wider">Plan View</span>
+                                        <span id="current-location-name" class="ml-3 text-[10px] px-3 py-0.5 bg-slate-800/50 text-slate-400 rounded-full border border-slate-700 uppercase font-bold tracking-widest">Select a location</span>
                                     </div>
                                     <div class="flex gap-x-2 text-xs">
-                                        <button onclick="uploadPlanImage()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 rounded-lg flex items-center gap-x-2">
+                                        <button onclick="uploadPlanImage()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 rounded-lg flex items-center gap-x-2 transition-colors border border-slate-700">
                                             <i class="fa-solid fa-upload fa-sm"></i>
-                                            <span>Upload Plan</span>
+                                            <span class="text-[10px] font-bold uppercase tracking-wider">Upload Plan</span>
                                         </button>
-                                        <button onclick="generateAllBackdrops()" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center gap-x-2 text-xs">
+                                        <button onclick="generateAllBackdrops()" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center gap-x-2 transition-colors shadow-lg shadow-blue-500/20">
                                             <i class="fa-solid fa-magic fa-sm"></i>
-                                            <span>AI Generate All</span>
+                                            <span class="text-[10px] font-bold uppercase tracking-wider">AI Generate All</span>
                                         </button>
                                     </div>
                                 </div>
@@ -853,7 +1002,7 @@ She turns as a shadow falls across the observatory floor.
                                 <!-- Plan View Canvas -->
                                 <div class="relative">
                                     <div id="plan-view" onclick="placeCameraMarker(event)" 
-                                         class="location-plan w-full h-[320px] rounded-2xl flex items-center justify-center relative cursor-crosshair">
+                                         class="location-plan w-full h-[320px] rounded-xl flex items-center justify-center relative cursor-crosshair">
                                         <div class="absolute inset-0 flex items-center justify-center text-center text-xs text-slate-500 pointer-events-none">
                                             <div>
                                                 <i class="fa-solid fa-map text-3xl mb-2 opacity-40"></i><br>
@@ -870,12 +1019,12 @@ She turns as a shadow falls across the observatory floor.
                                     <div class="flex items-center justify-between mt-3 px-1">
                                         <div class="flex items-center gap-x-2">
                                             <button onclick="togglePathMode()" 
-                                                    class="px-3 py-1.5 text-xs flex items-center gap-x-2 bg-slate-800 hover:bg-slate-700 rounded-xl border border-slate-600">
+                                                    class="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider flex items-center gap-x-2 bg-slate-800 hover:bg-slate-700 rounded-lg border border-slate-700 transition-colors">
                                                 <i class="fa-solid fa-route"></i>
                                                 <span id="path-mode-btn">Enable Path Mode</span>
                                             </button>
                                             
-                                            <select id="path-type" onchange="updateActivePathType()" class="bg-slate-800 border border-slate-600 text-xs px-3 py-1.5 rounded-xl">
+                                            <select id="path-type" onchange="updateActivePathType()" class="bg-slate-800 border border-slate-700 text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg focus:outline-none focus:border-blue-500">
                                                 <option value="static">Static Shot</option>
                                                 <option value="dolly">Dolly In</option>
                                                 <option value="orbit">Orbit</option>
@@ -884,7 +1033,7 @@ She turns as a shadow falls across the observatory floor.
                                         </div>
                                         
                                         <div>
-                                            <button onclick="clearCameraPath()" class="text-xs px-3 py-1 text-slate-400 hover:text-white">Clear Path</button>
+                                            <button onclick="clearCameraPath()" class="text-[10px] font-bold uppercase tracking-widest px-3 py-1 text-slate-500 hover:text-white transition-colors">Clear Path</button>
                                         </div>
                                     </div>
                                 </div>
@@ -893,22 +1042,22 @@ She turns as a shadow falls across the observatory floor.
                                 <div id="camera-controls" class="mt-5 hidden">
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                                         <!-- Camera -->
-                                        <div class="panel p-4 rounded-2xl">
+                                        <div class="panel p-4 rounded-xl border border-slate-700/50 bg-slate-900/30">
                                             <div class="flex items-center justify-between mb-4">
-                                                <div class="font-semibold text-sm">Camera Marker</div>
-                                                <div id="marker-id-badge" class="px-2.5 py-0.5 text-xs font-mono bg-blue-900 text-blue-300 rounded"></div>
+                                                <div class="font-display font-bold text-xs uppercase tracking-widest text-slate-400">Camera Marker</div>
+                                                <div id="marker-id-badge" class="px-2 py-0.5 text-[10px] font-mono bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded"></div>
                                             </div>
                                             
                                             <div class="space-y-4 text-sm">
                                                 <div>
-                                                    <label class="text-xs text-slate-400 block mb-1">Label</label>
-                                                    <input id="camera-label" type="text" value="Camera A" class="w-full bg-slate-800 border border-slate-700 px-3 py-2 text-sm rounded-xl">
+                                                    <label class="text-[9px] font-bold uppercase tracking-widest text-slate-500 block mb-1">Label</label>
+                                                    <input id="camera-label" type="text" value="Camera A" class="w-full bg-slate-900/50 border border-slate-700 px-3 py-2 text-xs rounded-lg focus:outline-none focus:border-blue-500 transition-colors">
                                                 </div>
                                                 
                                                 <div class="grid grid-cols-2 gap-3">
                                                     <div>
-                                                        <label class="text-xs text-slate-400 block mb-1">Shot Type</label>
-                                                        <select id="shot-type" class="w-full bg-slate-800 border border-slate-700 px-3 py-2 text-sm rounded-xl">
+                                                        <label class="text-[9px] font-bold uppercase tracking-widest text-slate-500 block mb-1">Shot Type</label>
+                                                        <select id="shot-type" class="w-full bg-slate-900/50 border border-slate-700 px-3 py-2 text-xs rounded-lg focus:outline-none focus:border-blue-500 transition-colors">
                                                             <option>Wide</option>
                                                             <option>Medium</option>
                                                             <option>Close-up</option>
@@ -916,8 +1065,8 @@ She turns as a shadow falls across the observatory floor.
                                                         </select>
                                                     </div>
                                                     <div>
-                                                        <label class="text-xs text-slate-400 block mb-1">Angle</label>
-                                                        <select id="camera-angle" class="w-full bg-slate-800 border border-slate-700 px-3 py-2 text-sm rounded-xl">
+                                                        <label class="text-[9px] font-bold uppercase tracking-widest text-slate-500 block mb-1">Angle</label>
+                                                        <select id="camera-angle" class="w-full bg-slate-900/50 border border-slate-700 px-3 py-2 text-xs rounded-lg focus:outline-none focus:border-blue-500 transition-colors">
                                                             <option>Eye Level</option>
                                                             <option>Low Angle</option>
                                                             <option>High Angle</option>
@@ -927,20 +1076,20 @@ She turns as a shadow falls across the observatory floor.
                                                 </div>
                                                 
                                                 <div>
-                                                    <label class="text-xs text-slate-400 block mb-1">Rotation <span id="rotation-value">180°</span></label>
-                                                    <input type="range" id="rotation-slider" min="0" max="360" step="5" value="180" class="w-full accent-blue-500">
+                                                    <label class="text-[9px] font-bold uppercase tracking-widest text-slate-500 block mb-1">Rotation <span id="rotation-value" class="text-blue-400 ml-1">180°</span></label>
+                                                    <input type="range" id="rotation-slider" min="0" max="360" step="5" value="180" class="w-full accent-blue-500 h-1 bg-slate-700 rounded-lg appearance-none cursor-pointer">
                                                 </div>
                                             </div>
                                         </div>
                                         
                                         <!-- Lighting -->
-                                        <div class="panel p-4 rounded-2xl">
-                                            <div class="font-semibold text-sm mb-4">Lighting</div>
+                                        <div class="panel p-4 rounded-xl border border-slate-700/50 bg-slate-900/30">
+                                            <div class="font-display font-bold text-xs uppercase tracking-widest text-slate-400 mb-4">Lighting</div>
                                             
                                             <div class="space-y-4 text-sm">
                                                 <div>
-                                                    <label class="text-xs text-slate-400 block mb-1">Technique</label>
-                                                    <select id="lighting-technique" class="w-full bg-slate-800 border border-slate-700 px-3 py-2 text-sm rounded-xl">
+                                                    <label class="text-[9px] font-bold uppercase tracking-widest text-slate-500 block mb-1">Technique</label>
+                                                    <select id="lighting-technique" class="w-full bg-slate-900/50 border border-slate-700 px-3 py-2 text-xs rounded-lg focus:outline-none focus:border-blue-500 transition-colors">
                                                         <option>Golden Hour</option>
                                                         <option>Natural / Soft</option>
                                                         <option>Chiaroscuro</option>
@@ -952,25 +1101,131 @@ She turns as a shadow falls across the observatory floor.
                                                 
                                                 <div class="grid grid-cols-2 gap-3">
                                                     <div>
-                                                        <label class="text-xs text-slate-400 block mb-1">Color Temp</label>
-                                                        <input type="range" id="color-temp" min="2000" max="8000" step="100" value="5600" class="w-full accent-amber-400">
-                                                        <div class="flex justify-between text-[10px] text-slate-500"><div>2000K</div><div>8000K</div></div>
+                                                        <label class="text-[9px] font-bold uppercase tracking-widest text-slate-500 block mb-1">Color Temp</label>
+                                                        <input type="range" id="color-temp" min="2000" max="8000" step="100" value="5600" class="w-full accent-amber-400 h-1 bg-slate-700 rounded-lg appearance-none cursor-pointer">
+                                                        <div class="flex justify-between text-[8px] text-slate-600 font-bold mt-1"><div>2000K</div><div>8000K</div></div>
                                                     </div>
                                                     <div>
-                                                        <label class="text-xs text-slate-400 block mb-1">Intensity</label>
-                                                        <input type="range" id="intensity" min="0" max="100" step="5" value="75" class="w-full accent-blue-400">
+                                                        <label class="text-[9px] font-bold uppercase tracking-widest text-slate-500 block mb-1">Intensity</label>
+                                                        <input type="range" id="intensity" min="0" max="100" step="5" value="75" class="w-full accent-blue-400 h-1 bg-slate-700 rounded-lg appearance-none cursor-pointer">
                                                     </div>
                                                 </div>
                                                 
                                                 <button onclick="generateBackdrop()" 
-                                                        class="mt-2 w-full py-2.5 text-sm font-medium flex items-center justify-center gap-x-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:brightness-110 transition-all text-white rounded-2xl">
+                                                        class="mt-2 w-full py-2.5 text-[11px] font-bold uppercase tracking-widest flex items-center justify-center gap-x-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:brightness-110 transition-all text-white rounded-xl shadow-lg shadow-blue-500/20">
                                                     <i class="fa-solid fa-image"></i>
-                                                    <span>Generate Backdrop from Camera + Lighting</span>
+                                                    <span>Generate Backdrop</span>
                                                 </button>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderPropsView() {
+            return `
+                <div class="max-w-6xl">
+                    <div class="flex justify-between items-end mb-6">
+                        <div>
+                            <h2 class="font-display text-2xl font-bold mb-1">Props</h2>
+                            <p class="text-sm text-slate-400">Scene assignments • Reference management • Status tracking</p>
+                        </div>
+                        <button onclick="showToast('Add new prop dialog would open')" class="px-4 py-2 text-sm bg-white text-slate-900 rounded-xl font-medium hover:bg-slate-100 transition-colors">
+                            <i class="fa-solid fa-plus"></i>
+                            <span>New Prop</span>
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        ${[
+                            {name: "Telescope", category: "Set Dressing", status: "Ready", scenes: "1, 12", refs: 3, readiness: 100},
+                            {name: "Signal Device", category: "Special Effect", status: "In Build", scenes: "1, 4", refs: 5, readiness: 40},
+                            {name: "Leather Coat", category: "Wardrobe", status: "Sourced", scenes: "1, 3", refs: 2, readiness: 65},
+                            {name: "Vintage Radio", category: "Hand Prop", status: "Ready", scenes: "7", refs: 1, readiness: 95}
+                        ].map(prop => `
+                            <div class="panel p-5 card-hover">
+                                <div class="flex justify-between">
+                                    <div>
+                                        <div class="font-semibold text-lg">${prop.name}</div>
+                                        <div class="text-[10px] text-slate-500 uppercase tracking-wider font-bold">${prop.category}</div>
+                                    </div>
+                                    <div class="text-right flex flex-col items-end gap-1.5">
+                                        <div class="text-[9px] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-tighter ${prop.status === 'Ready' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/20 text-amber-400 border border-amber-500/20'}">
+                                            ${prop.status}
+                                        </div>
+                                        ${getReadinessBadge(prop.readiness)}
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-4 text-xs space-y-1.5">
+                                    <div class="flex justify-between"><span class="text-slate-500 uppercase font-bold text-[9px]">Scenes</span> <span class="text-slate-300 font-mono">${prop.scenes}</span></div>
+                                    <div class="flex justify-between"><span class="text-slate-500 uppercase font-bold text-[9px]">References</span> <span class="text-slate-300 font-mono">${prop.refs} images</span></div>
+                                </div>
+
+                                <div class="mt-5 flex gap-x-2 text-[11px] font-bold uppercase tracking-wider">
+                                    <button onclick="showToast('Prop detail opened')" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors border border-slate-700">Details</button>
+                                    <button onclick="showToast('Reference uploaded')" class="flex-1 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors shadow-lg shadow-blue-500/10">Add Ref</button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderWardrobeView() {
+            return `
+                <div class="max-w-6xl">
+                    <div class="flex justify-between items-end mb-6">
+                        <div>
+                            <h2 class="font-display text-2xl font-bold mb-1">Wardrobe</h2>
+                            <p class="text-sm text-slate-400">Character costume design • Body diagram • Reference library</p>
+                        </div>
+                        <button onclick="showToast('New garment dialog')" class="px-4 py-2 text-sm bg-white text-slate-900 rounded-xl font-medium hover:bg-slate-100 transition-colors">
+                            <i class="fa-solid fa-plus"></i>
+                            <span>New Garment</span>
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                        <!-- Body Diagram -->
+                        <div class="lg:col-span-5 panel p-6 card-hover">
+                            <div class="font-display font-bold text-sm uppercase tracking-wider mb-4 border-b border-slate-700/50 pb-2">Body Diagram — Dr. Elena Voss</div>
+                            <div class="mock-image h-80 rounded-xl flex items-center justify-center text-center">
+                                <div>
+                                    <i class="fa-solid fa-user text-6xl mb-4 opacity-30"></i><br>
+                                    <span class="text-[10px] uppercase tracking-widest font-bold text-slate-500">Interactive body zones<br>(Head, Torso, Arms, Legs)</span>
+                                </div>
+                            </div>
+                            <div class="mt-3 text-[10px] text-center text-slate-500 uppercase font-bold tracking-tighter">Click zones to assign garments</div>
+                        </div>
+
+                        <!-- Garment Library -->
+                        <div class="lg:col-span-7">
+                            <div class="section-header mb-3 px-1">Garment Library</div>
+                            <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                                ${[
+                                    {name: "Leather Trench Coat", color: "Black", fit: "Regular", readiness: 100},
+                                    {name: "High-Neck Sweater", color: "Charcoal", fit: "Fitted", readiness: 80},
+                                    {name: "Wide-Leg Trousers", color: "Navy", fit: "Loose", readiness: 45},
+                                    {name: "Combat Boots", color: "Brown", fit: "Regular", readiness: 90}
+                                ].map(item => `
+                                    <div class="panel p-4 card-hover cursor-pointer border border-transparent hover:border-blue-500 transition-all" onclick="showToast('Garment assigned to character')">
+                                        <div class="flex justify-between items-start mb-1">
+                                            <div class="font-semibold text-sm">${item.name}</div>
+                                            ${getReadinessBadge(item.readiness)}
+                                        </div>
+                                        <div class="text-[10px] text-slate-500 uppercase tracking-wider font-bold mt-1">${item.color} • ${item.fit}</div>
+                                        <div class="mt-3 flex gap-x-2">
+                                            <div class="px-2 py-0.5 bg-slate-800/50 border border-slate-700 rounded text-[9px] font-bold uppercase tracking-tighter text-slate-400">AI Variant</div>
+                                        </div>
+                                    </div>
+                                `).join('')}
                             </div>
                         </div>
                     </div>
@@ -984,18 +1239,18 @@ She turns as a shadow falls across the observatory floor.
 
             return `
                 <div class="max-w-[1200px]">
-                    <div class="flex justify-between items-center mb-4">
+                    <div class="flex justify-between items-center mb-6">
                         <div>
-                            <h2 class="font-semibold text-2xl">Shot Composer</h2>
-                            <p class="text-xs text-slate-400">Define the shot → then generate storyboard frames from it</p>
+                            <h2 class="font-display text-2xl font-bold mb-1">Shot Composer</h2>
+                            <p class="text-xs text-slate-400 uppercase tracking-widest">Define the shot → then generate storyboard frames from it</p>
                         </div>
                         <div class="flex gap-x-2">
-                            <button onclick="createScratchShot()" class="px-4 py-2 text-xs bg-violet-600 hover:bg-violet-700 transition-colors rounded-2xl flex items-center gap-x-2 text-sm">
+                            <button onclick="createScratchShot()" class="px-4 py-2 text-[11px] font-bold uppercase tracking-wider bg-violet-600 hover:bg-violet-700 transition-all rounded-lg flex items-center gap-x-2 text-white shadow-lg shadow-violet-500/20">
                                 <i class="fa-solid fa-plus"></i>
-                                <span>Create Custom Shot (Scratchpad)</span>
+                                <span>Create Custom Shot</span>
                             </button>
                             ${hasScratchShots ? `
-                            <button onclick="showScratchShotsList()" class="px-4 py-2 text-xs bg-slate-700 hover:bg-slate-600 transition-colors rounded-2xl flex items-center gap-x-2 text-sm">
+                            <button onclick="showScratchShotsList()" class="px-4 py-2 text-[11px] font-bold uppercase tracking-wider bg-slate-800 hover:bg-slate-700 transition-all rounded-lg flex items-center gap-x-2 text-slate-300 border border-slate-700">
                                 <i class="fa-solid fa-list"></i>
                                 <span>Load Scratch Shot</span>
                             </button>` : ''}
@@ -1003,44 +1258,44 @@ She turns as a shadow falls across the observatory floor.
                     </div>
 
                     <!-- Shot Navigator (loads from script/scene) -->
-                    <div class="mb-5">
-                        <div class="flex items-center justify-between mb-2 px-1">
-                            <div class="text-xs text-slate-400">CURRENT SCENE SHOTS (from script)</div>
-                            <div class="text-xs text-emerald-400 cursor-pointer" onclick="showToast('In full app this would open Scene Selector')">Scene 1 • 3 shots</div>
+                    <div class="mb-6">
+                        <div class="flex items-center justify-between mb-3 px-1">
+                            <div class="text-[10px] font-bold uppercase tracking-[1.5px] text-slate-500">Current Scene Shots</div>
+                            <div class="text-[10px] font-bold uppercase tracking-widest text-emerald-400 cursor-pointer hover:text-emerald-300 transition-colors" onclick="showToast('In full app this would open Scene Selector')">Scene 1 • 3 shots</div>
                         </div>
                         
-                        <div class="flex gap-x-2 overflow-x-auto pb-2">
+                        <div class="flex gap-x-2 overflow-x-auto pb-3 scrollbar-thin">
                             ${(mockData.shots[1] || []).map(shot => `
                                 <div onclick="loadShotFromScript(${shot.id})" 
-                                     class="cursor-pointer px-4 py-2 text-sm rounded-2xl border flex-shrink-0 transition-all ${mockData.currentShot && mockData.currentShot.id === shot.id ? 'bg-blue-600 border-blue-500' : 'bg-slate-800 border-slate-700 hover:border-slate-500'}">
-                                    <div class="font-mono text-xs">${shot.number}</div>
-                                    <div class="text-xs">${shot.fieldSize} • ${shot.lighting}</div>
+                                     class="cursor-pointer px-4 py-2.5 rounded-xl border transition-all flex-shrink-0 card-hover ${mockData.currentShot && mockData.currentShot.id === shot.id ? 'bg-blue-600 border-blue-500 shadow-lg shadow-blue-500/20' : 'bg-slate-800/50 border-slate-700 hover:border-slate-500'}">
+                                    <div class="font-mono text-[10px] font-bold ${mockData.currentShot && mockData.currentShot.id === shot.id ? 'text-blue-100' : 'text-blue-400'}">${shot.number}</div>
+                                    <div class="text-[11px] font-bold uppercase tracking-tighter mt-0.5 ${mockData.currentShot && mockData.currentShot.id === shot.id ? 'text-white' : 'text-slate-300'}">${shot.fieldSize} • ${shot.lighting}</div>
                                 </div>
                             `).join('')}
                             
                             <div onclick="createScratchShot()" 
-                                 class="cursor-pointer px-4 py-2 text-sm rounded-2xl border border-dashed border-slate-600 flex-shrink-0 flex items-center text-xs text-slate-400 hover:text-white">
-                                + Custom
+                                 class="cursor-pointer px-4 py-2.5 rounded-xl border border-dashed border-slate-700 flex-shrink-0 flex items-center text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:text-white hover:border-slate-500 transition-all">
+                                <i class="fa-solid fa-plus mr-2"></i> Custom
                             </div>
                         </div>
                     </div>
 
                     <!-- Clear separation: Shot Definition -->
-                    <div class="panel p-6 rounded-3xl mb-6">
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="font-semibold">1. DEFINE THE SHOT</div>
-                            <div class="text-xs px-3 py-1 bg-slate-800 rounded-full text-slate-400">This is the shot configuration</div>
+                    <div class="panel p-6 card-hover mb-6">
+                        <div class="flex items-center justify-between mb-5 border-b border-slate-700/50 pb-3">
+                            <div class="font-display font-bold text-sm uppercase tracking-widest text-slate-300">1. Define the Shot</div>
+                            <div class="text-[9px] font-bold uppercase tracking-widest px-3 py-1 bg-slate-900/50 border border-slate-700/50 rounded-full text-slate-500">Shot Configuration</div>
                         </div>
 
-                        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
                             
                             <!-- Shot Parameters -->
                             <div class="lg:col-span-5">
-                                <div class="text-xs text-slate-400 mb-2">SHOT PARAMETERS</div>
-                                <div class="space-y-4">
+                                <div class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-4">Shot Parameters</div>
+                                <div class="space-y-5">
                                     <div>
-                                        <label class="text-xs text-slate-400 block mb-1">Field Size / Shot Type</label>
-                                        <select id="field-size" class="w-full bg-slate-800 border border-slate-700 px-3 py-2 text-sm rounded-2xl">
+                                        <label class="text-[9px] font-bold uppercase tracking-widest text-slate-600 block mb-1.5">Field Size / Shot Type</label>
+                                        <select id="field-size" class="w-full bg-slate-900/50 border border-slate-700 px-3 py-2 text-xs rounded-lg focus:outline-none focus:border-blue-500 transition-colors">
                                             <option value="ECU">ECU — Extreme Close-Up</option>
                                             <option value="CU">CU — Close-Up</option>
                                             <option value="MCU" selected>MCU — Medium Close-Up</option>
@@ -1051,10 +1306,10 @@ She turns as a shadow falls across the observatory floor.
                                         </select>
                                     </div>
 
-                                    <div class="grid grid-cols-2 gap-3">
+                                    <div class="grid grid-cols-2 gap-4">
                                         <div>
-                                            <label class="text-xs text-slate-400 block mb-1">Camera Movement</label>
-                                            <select class="w-full bg-slate-800 border border-slate-700 px-3 py-2 text-sm rounded-2xl">
+                                            <label class="text-[9px] font-bold uppercase tracking-widest text-slate-600 block mb-1.5">Camera Movement</label>
+                                            <select class="w-full bg-slate-900/50 border border-slate-700 px-3 py-2 text-xs rounded-lg focus:outline-none focus:border-blue-500 transition-colors">
                                                 <option>Static</option>
                                                 <option>Dolly In</option>
                                                 <option>Pan Left → Right</option>
@@ -1063,14 +1318,14 @@ She turns as a shadow falls across the observatory floor.
                                             </select>
                                         </div>
                                         <div>
-                                            <label class="text-xs text-slate-400 block mb-1">Duration</label>
-                                            <input type="text" value="4.5s" class="w-full bg-slate-800 border border-slate-700 px-3 py-2 text-sm rounded-2xl">
+                                            <label class="text-[9px] font-bold uppercase tracking-widest text-slate-600 block mb-1.5">Duration</label>
+                                            <input type="text" value="4.5s" class="w-full bg-slate-900/50 border border-slate-700 px-3 py-2 text-xs rounded-lg focus:outline-none focus:border-blue-500 transition-colors font-mono">
                                         </div>
                                     </div>
 
                                     <div>
-                                        <label class="text-xs text-slate-400 block mb-1">Lighting Setup (from Plan View)</label>
-                                        <select id="lighting-setup" class="w-full bg-slate-800 border border-slate-700 px-3 py-2 text-sm rounded-2xl">
+                                        <label class="text-[9px] font-bold uppercase tracking-widest text-slate-600 block mb-1.5">Lighting Setup (from Plan View)</label>
+                                        <select id="lighting-setup" class="w-full bg-slate-900/50 border border-slate-700 px-3 py-2 text-xs rounded-lg focus:outline-none focus:border-blue-500 transition-colors">
                                             <option value="3-point">3-Point Lighting</option>
                                             <option value="rim">Rim Light / Backlight</option>
                                             <option value="high-key">High Key</option>
@@ -1083,20 +1338,20 @@ She turns as a shadow falls across the observatory floor.
 
                             <!-- Active References -->
                             <div class="lg:col-span-7">
-                                <div class="text-xs text-slate-400 mb-2">ACTIVE REFERENCES (imported automatically)</div>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
+                                <div class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-4">Active References (Imported)</div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-[11px] font-medium">
                                     ${lockedChars.length > 0 ? lockedChars.map(char => `
-                                        <div class="bg-slate-800 px-3 py-2 rounded-xl flex justify-between items-center">
-                                            <div><span class="text-emerald-400">●</span> ${char.name} <span class="text-emerald-400">[${char.lockStrength}% locked]</span></div>
+                                        <div class="bg-slate-800/50 border border-slate-700/50 px-3 py-2.5 rounded-xl flex justify-between items-center card-hover">
+                                            <div><span class="text-emerald-400 mr-2">●</span> ${char.name} <span class="text-emerald-500/60 font-mono text-[9px] ml-1">[${char.lockStrength}% LOCKED]</span></div>
                                         </div>
-                                    `).join('') : '<div class="text-slate-500 col-span-2">No characters locked yet — go to Entities → Characters</div>'}
+                                    `).join('') : '<div class="text-slate-600 col-span-2 italic bg-slate-900/30 border border-dashed border-slate-800 p-4 rounded-xl text-center">No characters locked yet — go to Entities → Characters</div>'}
                                     
-                                    <div class="bg-slate-800 px-3 py-2 rounded-xl">
-                                        <span class="text-blue-400">●</span> Location: ${selectedLocation ? selectedLocation.name : 'None selected'}
+                                    <div class="bg-slate-800/50 border border-slate-700/50 px-3 py-2.5 rounded-xl card-hover">
+                                        <span class="text-blue-400 mr-2">●</span> <span class="text-slate-500 uppercase tracking-tighter text-[9px] mr-1">Location:</span> ${selectedLocation ? selectedLocation.name : 'None selected'}
                                     </div>
                                     
-                                    <div class="bg-slate-800 px-3 py-2 rounded-xl">
-                                        <span class="text-amber-400">●</span> Lighting: <span id="active-lighting-display">3-Point</span>
+                                    <div class="bg-slate-800/50 border border-slate-700/50 px-3 py-2.5 rounded-xl card-hover">
+                                        <span class="text-amber-400 mr-2">●</span> <span class="text-slate-500 uppercase tracking-tighter text-[9px] mr-1">Lighting:</span> <span id="active-lighting-display">3-Point</span>
                                     </div>
                                 </div>
                             </div>
@@ -1104,35 +1359,35 @@ She turns as a shadow falls across the observatory floor.
                     </div>
 
                     <!-- Clear separation: Generate Frames -->
-                    <div class="panel p-6 rounded-3xl">
-                        <div class="flex items-center justify-between mb-4">
+                    <div class="panel p-6 card-hover">
+                        <div class="flex items-center justify-between mb-5 border-b border-slate-700/50 pb-3">
                             <div>
-                                <div class="font-semibold">2. GENERATE STORYBOARD FRAMES FROM THIS SHOT</div>
-                                <div class="text-xs text-slate-400">One shot can produce multiple frames (different moments / angles)</div>
+                                <div class="font-display font-bold text-sm uppercase tracking-widest text-slate-300">2. Generate Storyboard Frames</div>
+                                <div class="text-[9px] font-bold uppercase tracking-widest text-slate-500 mt-1">One shot can produce multiple frames (different moments / angles)</div>
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
                             <div class="lg:col-span-7">
-                                <div class="text-xs text-slate-400 mb-2">PROMPT PREVIEW (auto-built from shot definition)</div>
-                                <div id="prompt-preview" class="bg-slate-950 border border-slate-700 p-4 rounded-2xl text-xs font-mono leading-snug min-h-[110px]">
+                                <div class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3">Prompt Preview (Auto-Built)</div>
+                                <div id="prompt-preview" class="bg-[#0b1220] border border-slate-700/50 p-4 rounded-xl text-[11px] font-mono leading-relaxed min-h-[120px] text-slate-400 shadow-inner">
                                     <!-- Populated by JS -->
                                 </div>
                             </div>
 
                             <div class="lg:col-span-5 flex flex-col justify-end">
                                 <div class="flex gap-x-3">
-                                    <button onclick="generateFrame()" class="flex-1 py-3 bg-blue-600 hover:bg-blue-700 transition-colors rounded-2xl text-sm font-medium flex items-center justify-center gap-x-2">
+                                    <button onclick="generateFrame()" class="flex-1 py-3 bg-blue-600 hover:bg-blue-700 transition-all rounded-xl text-[11px] font-bold uppercase tracking-widest flex items-center justify-center gap-x-2 text-white shadow-lg shadow-blue-500/20">
                                         <i class="fa-solid fa-image"></i>
                                         <span>Generate 1 Frame</span>
                                     </button>
-                                    <button onclick="generateMultipleFrames()" class="flex-1 py-3 border border-blue-600 hover:bg-blue-900/30 transition-colors rounded-2xl text-sm flex items-center justify-center gap-x-2">
-                                        <span>Generate 3 Variations</span>
+                                    <button onclick="generateMultipleFrames()" class="flex-1 py-3 border border-blue-600/50 hover:bg-blue-600/10 transition-all rounded-xl text-[11px] font-bold uppercase tracking-widest flex items-center justify-center gap-x-2 text-blue-400">
+                                        <span>3 Variations</span>
                                     </button>
                                 </div>
-                                <button onclick="generateVideo()" class="mt-3 w-full py-3 border border-slate-600 hover:bg-slate-800 transition-colors rounded-2xl text-sm flex items-center justify-center gap-x-2">
+                                <button onclick="generateVideo()" class="mt-3 w-full py-3 border border-slate-700 hover:bg-slate-700/50 transition-all rounded-xl text-[11px] font-bold uppercase tracking-widest flex items-center justify-center gap-x-2 text-slate-400">
                                     <i class="fa-solid fa-video"></i>
-                                    <span>Generate Video from this Shot</span>
+                                    <span>Generate Video Clip</span>
                                 </button>
                             </div>
                         </div>
@@ -1514,7 +1769,7 @@ She turns as a shadow falls across the observatory floor.
             const modal = document.createElement('div');
             modal.className = `fixed inset-0 bg-black/70 flex items-center justify-center z-50`;
             modal.innerHTML = `
-                <div class="panel w-full max-w-md mx-4 p-6 rounded-3xl">
+                <div class="panel w-full max-w-md mx-4 p-6 rounded-xl">
                     <div class="font-semibold mb-1">Your Scratchpad Shots</div>
                     <div class="text-xs text-slate-400 mb-4">Custom shots created for experimentation</div>
                     <div class="max-h-80 overflow-auto space-y-1">
@@ -1601,7 +1856,7 @@ She turns as a shadow falls across the observatory floor.
             if (type === 'location') {
                 inspector.innerHTML = `
                     <div class="text-sm font-semibold mb-3">Location Details</div>
-                    <div class="panel p-4 rounded-2xl text-sm">
+                    <div class="panel p-4 rounded-xl text-sm">
                         <div class="font-medium">${data.name}</div>
                         <div class="text-xs text-slate-400 mt-1">Used in scenes: ${data.scenes}</div>
                         
@@ -1616,7 +1871,7 @@ She turns as a shadow falls across the observatory floor.
             } else if (type === 'camera') {
                 inspector.innerHTML = `
                     <div class="text-sm font-semibold mb-3">Camera Marker</div>
-                    <div class="panel p-4 rounded-2xl text-sm space-y-3">
+                    <div class="panel p-4 rounded-xl text-sm space-y-3">
                         <div><span class="text-xs text-slate-400">ID</span><br><span class="font-mono">${data.id}</span></div>
                         <div><span class="text-xs text-slate-400">Label</span><br><span>${data.label}</span></div>
                         <div><span class="text-xs text-slate-400">Location</span><br><span>${data.location}</span></div>
@@ -1629,7 +1884,7 @@ She turns as a shadow falls across the observatory floor.
             } else if (type === 'backdrop-generated') {
                 inspector.innerHTML = `
                     <div class="text-sm font-semibold mb-2">AI Backdrop Generated</div>
-                    <div class="panel p-4 rounded-2xl text-xs">
+                    <div class="panel p-4 rounded-xl text-xs">
                         <div class="font-medium">${data.location}</div>
                         <div>Camera ${data.camera} • ${data.lighting}</div>
                         <div class="mt-3 text-emerald-400">✓ Saved to project references</div>
@@ -1639,7 +1894,7 @@ She turns as a shadow falls across the observatory floor.
                 inspector.innerHTML = `
                     <div class="text-sm">Storyboard Frame #${data.number}</div>
                     <div class="mt-2 text-xs text-slate-400">Uses active location backdrop + lighting settings</div>
-                    <button onclick="showToast('Opened in full Shot Designer')" class="mt-4 text-xs px-4 py-2 bg-blue-600 rounded-2xl w-full">Open in Shot Designer</button>
+                    <button onclick="showToast('Opened in full Shot Designer')" class="mt-4 text-xs px-4 py-2 bg-blue-600 rounded-xl w-full">Open in Shot Designer</button>
                 `;
             }
         }
@@ -1647,6 +1902,10 @@ She turns as a shadow falls across the observatory floor.
         function simulateParse() {
             showToast("Parsing script and syncing entities...");
             setTimeout(() => {
+                lastSyncHash = hash(mockData.scriptText);
+                const banner = document.getElementById('diff-banner');
+                if (banner) banner.classList.add('hidden');
+                
                 showToast("3 new characters + 2 locations synced to project");
                 // Optionally switch to entities
             }, 1200);
@@ -1656,20 +1915,20 @@ She turns as a shadow falls across the observatory floor.
             const modal = document.createElement('div');
             modal.className = `fixed inset-0 bg-black/70 flex items-center justify-center z-50`;
             modal.innerHTML = `
-                <div class="panel w-full max-w-md mx-4 p-7 rounded-3xl">
+                <div class="panel w-full max-w-md mx-4 p-7 rounded-xl">
                     <div class="font-semibold text-lg mb-1">Export Project</div>
                     <div class="text-xs text-slate-400 mb-5">Choose format</div>
                     
                     <div class="space-y-2 text-sm">
-                        <div class="flex items-center justify-between px-4 py-3 bg-slate-800 rounded-2xl cursor-pointer hover:bg-slate-700" onclick="performExport('storyboard-pdf')">
+                        <div class="flex items-center justify-between px-4 py-3 bg-slate-800 rounded-xl cursor-pointer hover:bg-slate-700" onclick="performExport('storyboard-pdf')">
                             <div>Storyboard PDF</div>
                             <i class="fa-solid fa-file-pdf text-red-400"></i>
                         </div>
-                        <div class="flex items-center justify-between px-4 py-3 bg-slate-800 rounded-2xl cursor-pointer hover:bg-slate-700" onclick="performExport('breakdown')">
+                        <div class="flex items-center justify-between px-4 py-3 bg-slate-800 rounded-xl cursor-pointer hover:bg-slate-700" onclick="performExport('breakdown')">
                             <div>Breakdown Sheet (CSV)</div>
                             <i class="fa-solid fa-table text-emerald-400"></i>
                         </div>
-                        <div class="flex items-center justify-between px-4 py-3 bg-slate-800 rounded-2xl cursor-pointer hover:bg-slate-700" onclick="performExport('treatment')">
+                        <div class="flex items-center justify-between px-4 py-3 bg-slate-800 rounded-xl cursor-pointer hover:bg-slate-700" onclick="performExport('treatment')">
                             <div>Treatment + Style Guide</div>
                             <i class="fa-solid fa-file-lines text-blue-400"></i>
                         </div>
@@ -1818,6 +2077,9 @@ She turns as a shadow falls across the observatory floor.
         // Initialize everything
         function initializeApp() {
             initializeTailwind();
+            
+            // Initial sync hash
+            lastSyncHash = hash(mockData.scriptText);
             
             // Start on Script tab
             const scriptTab = document.getElementById('left-script');
