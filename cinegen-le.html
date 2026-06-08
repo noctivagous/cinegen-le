@@ -181,7 +181,7 @@
             overflow: hidden;
         }
         .editor-toolbar {
-            background: #0f172a;
+            background: #333;
             border-bottom: 1px solid #1f2a44;
         }
         .editor-textarea {
@@ -192,6 +192,9 @@
             line-height: 1.7;
             tab-size: 4;
             resize: none;
+            
+            background:gray;
+        	color:white;
         }
         .editor-textarea:focus { outline: none; }
         .line-numbers {
@@ -202,6 +205,7 @@
             user-select: none;
             text-align: right;
             padding-right: 1rem;
+            background: darkcyan;
         }
 
         .diff-banner {
@@ -227,11 +231,66 @@
         }
         #main-content{
         padding:1.25rem;
+    padding-top:.75em;
+            border-top: 1pt solid gray;
+    border-left: 1pt solid gray;
+    border-right: 1px solid white;
+
+        }
+        
+        #script-editor-widget{
+        	       border-top: 1pt solid gray;
+    			box-shadow: 1px 1px 1px white;border-radius: 5pt;
         }
         
         h2{
-        color:#3d72a0;
+        color:#96b2cb;
+        font-size:1.25rem !important;
+        font-family: 'Space Grotesk' !important;
         }
+        
+        #script-editor{
+ 
+        }
+        
+        #line-numbers{
+        background:darkcyan;
+        }
+        
+        .panel{
+        background:#2e3647;
+
+        border-right: 1pt solid #9a9797;
+    border-bottom: 1pt solid gray;
+		border-radius:.5em;
+        }
+        
+        .panelHeadingBlock
+        {
+        border-bottom: 1pt solid #4d4d4d;
+    padding-bottom: .25em;
+        }
+        
+        h3{
+         border-bottom: 1pt solid #4d4d4d !important;
+    padding-bottom: .25em !important;
+        
+        }
+        
+        .items-start{
+        
+      border-bottom: 1px solid #595e69;
+        }
+        
+        .panelHeader{
+        	
+    padding-bottom: .25em;
+        }
+        
+        .fullSpanCards .card-hover{
+        padding:1.25rem !important;
+        }
+        
     </style>
 </head>
 <body class="bg-[#0f172a] text-slate-200 cinematic-bg min-h-screen antialiased">
@@ -307,10 +366,10 @@
                     <span class="font-medium">Beats</span>
                 </div>
                 
-                <div onclick="switchLeftTab('visuals')" id="left-visuals"
+                <div onclick="switchLeftTab('images')" id="left-images"
                      class="nav-tab flex items-center gap-x-3 px-4 py-3 text-sm rounded-xl cursor-pointer text-slate-400 hover:bg-slate-700/50">
                     <i class="fa-solid fa-palette w-5 text-center"></i>
-                    <span class="font-medium">Visuals</span>
+                    <span class="font-medium">Images</span>
                 </div>
                 
                 <div onclick="switchLeftTab('production')" id="left-production"
@@ -535,7 +594,7 @@ She turns as a shadow falls across the observatory floor.`
                 case 'breakdown': currentTopTab = 'all'; break;
                 case 'entities': currentTopTab = 'locations'; break;
                 case 'beats': currentTopTab = 'timeline'; break;
-                case 'visuals': currentTopTab = 'shot-composer'; break;
+                case 'images': currentTopTab = 'shot-composer'; break;
                 case 'production': currentTopTab = 'dashboard'; break;
             }
 
@@ -585,7 +644,7 @@ She turns as a shadow falls across the observatory floor.`
                     ];
                     break;
                     
-                case 'visuals':
+                case 'images':
                     tabs = [
                         { id: 'mood', label: 'Mood Board' },
                         { id: 'references', label: 'References' },
@@ -629,7 +688,7 @@ She turns as a shadow falls across the observatory floor.`
                     const isDiff = lastSyncHash && hash(mockData.scriptText) !== lastSyncHash;
                     html = `
                         <div class="max-w-6xl mx-auto">
-                            <div class="flex items-center justify-between mb-6">
+                            <div class="panelHeadingBlock flex items-center justify-between mb-6">
                                 <div>
                                     <h2 class="font-display text-2xl font-bold mb-1">Script Editor</h2>
                                     <p class="text-xs text-slate-400 uppercase tracking-widest">Fountain syntax • Auto-parsed entities</p>
@@ -659,7 +718,7 @@ She turns as a shadow falls across the observatory floor.`
                             
                             <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
                                 <!-- Editor -->
-                                <div class="xl:col-span-2 editor-wrap shadow-2xl">
+                                <div id="script-editor-widget" class="xl:col-span-2 editor-wrap shadow-2xl">
                                     <div class="editor-toolbar px-4 py-2 flex items-center justify-between">
                                         <div class="flex items-center gap-3">
                                             <span class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Screenplay.fdx</span>
@@ -721,11 +780,14 @@ She turns as a shadow falls across the observatory floor.`
                     
                 case 'breakdown':
                     html = `
-                        <div class="max-w-6xl">
+                        <div class="max-w-6xl sectionPanel" id="breakdown-panel">
+                        
+                        	<div class="panelHeader">
                             <h2 class="font-semibold text-2xl mb-1">Breakdown</h2>
                             <p class="text-sm text-slate-400 mb-5">Scene-by-scene element extraction • Auto-tagged from script + manual overrides</p>
-                            
-                            <div class="space-y-6">
+                        	</div>
+                        	                            
+                            <div class="fullSpanCards space-y-6">
                                 ${mockData.scenes.map(scene => `
                                     <div class="panel p-6 card-hover">
                                         <div class="flex justify-between items-start mb-4">
@@ -831,13 +893,13 @@ She turns as a shadow falls across the observatory floor.`
                     `;
                     break;
                     
-                case 'visuals':
+                case 'images':
                     if (currentTopTab === 'storyboard' || currentTopTab === 'shot-composer') {
-                        html = renderVisualsView();
+                        html = renderImagesView();
                     } else {
                         html = `
                             <div class="max-w-3xl">
-                                <h2 class="font-display text-2xl font-bold mb-1">Visuals — ${currentTopTab}</h2>
+                                <h2 class="font-display text-2xl font-bold mb-1">Images — ${currentTopTab}</h2>
                                 <div class="mt-12 text-center text-sm text-slate-500">
                                     <i class="fa-solid fa-palette text-4xl mb-4 opacity-20"></i>
                                     <p class="uppercase tracking-widest text-[11px] font-bold">Mood Board and References views available in full build.</p>
@@ -886,7 +948,7 @@ She turns as a shadow falls across the observatory floor.`
                 attachLocationListeners();
             }
             
-            if (leftTab === 'visuals') {
+            if (leftTab === 'images') {
                 attachVisualListeners();
             }
         }
@@ -1252,7 +1314,7 @@ She turns as a shadow falls across the observatory floor.`
             `;
         }
 
-        function renderVisualsView() {
+        function renderImagesView() {
             const lockedChars = mockData.characters.filter(c => c.locked);
             const hasScratchShots = mockData.scratchShots.length > 0;
 
