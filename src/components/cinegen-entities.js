@@ -1,15 +1,17 @@
 import { LitElement, html, css } from 'lit';
+import { classMap } from 'lit/directives/class-map.js';
+import { CinegenPanel } from './cinegen-panel.js';
 import { projectState } from '../core/projectState.js';
 
-export class CinegenEntities extends LitElement {
-  static styles = css`
-    :host { display: block; max-width: 1200px; margin: 0 auto; width: 100%; }
-    h2 { font-family: 'Space Grotesk', sans-serif; color: #96b2cb; font-size: 1.25rem !important; }
+export class CinegenEntities extends CinegenPanel {
+  static styles = [
+    super.styles,
+    css`
     .placeholder { text-align: center; padding: 3rem 0; color: var(--text-muted, #64748b); font-size: 14px; }
     .placeholder i { font-size: 2rem; margin-bottom: 1rem; opacity: 0.2; }
     .placeholder p { text-transform: uppercase; letter-spacing: 0.05em; font-size: 11px; font-weight: 700; }
     .placeholder span { font-size: 10px; color: rgba(100,116,139,0.6); }
-  `;
+  `];
 
   static properties = {
     topTab: { type: String }
@@ -45,14 +47,14 @@ export class CinegenEntities extends LitElement {
 
 export class CinegenCharacters extends LitElement {
   static styles = css`
-    :host { display: block; max-width: 960px; }
+    :host { display: block; max-width: 1200px; }
     .header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1.5rem; }
     .header h2 { margin-bottom: 4px; }
     .header p { font-size: 14px; color: var(--text-muted, #64748b); }
     .btn { padding: 8px 16px; border-radius: 12px; font-size: 14px; font-weight: 500; border: none; cursor: pointer; display: flex; align-items: center; gap: 8px; background: white; color: #0f172a; }
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; }
-    .card { background: rgba(30,41,59,0.6); backdrop-filter: blur(12px); border: 1px solid rgba(51,65,85,0.5); border-radius: 12px; padding: 1.25rem; transition: all 0.3s; }
-    .card:hover { transform: translateY(-2px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); border-color: var(--accent, #3b82f6); }
+    .card { background: #2e3647; border-right: 1pt solid #9a9797; border-bottom: 1pt solid gray; border-radius: 0.5em; padding: 1.25rem; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    .card:hover { transform: translateY(-2px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3), 0 10px 10px -5px rgba(0,0,0,0.2); border-color: var(--accent, #3b82f6); }
     .card-top { display: flex; justify-content: space-between; align-items: flex-start; }
     .card-name { font-weight: 600; font-size: 1.125rem; }
     .card-desc { font-size: 12px; color: var(--text-muted, #64748b); margin-top: 2px; }
@@ -74,7 +76,7 @@ export class CinegenCharacters extends LitElement {
     .lock-btn { padding: 6px 16px; border-radius: 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; border: none; cursor: pointer; transition: background 0.2s; }
     .lock-btn.locked { background: #059669; color: white; }
     .lock-btn.unlocked { background: rgba(51,65,85,0.5); color: var(--text-secondary, #cbd5e1); }
-    .info-box { margin-top: 2rem; padding: 1.25rem; border-radius: 12px; background: rgba(30,41,59,0.6); backdrop-filter: blur(12px); border: 1px solid rgba(51,65,85,0.5); font-size: 12px; color: var(--text-muted, #64748b); line-height: 1.5; }
+    .info-box { margin-top: 2rem; padding: 1.25rem; border-radius: 0.5em; background: #2e3647; border-right: 1pt solid #9a9797; border-bottom: 1pt solid gray; font-size: 12px; color: var(--text-muted, #64748b); line-height: 1.5; }
     .info-box strong { color: #10b981; }
   `;
 
@@ -210,7 +212,7 @@ export class CinegenLocations extends LitElement {
     .flex { display: flex; gap: 1.5rem; }
     .library { width: 288px; flex-shrink: 0; }
     .library-title { font-size: 12px; font-weight: 700; color: var(--text-muted, #64748b); letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 12px; padding: 0 4px; }
-    .loc-card { cursor: pointer; padding: 1rem; border-radius: 12px; background: rgba(30,41,59,0.6); backdrop-filter: blur(12px); border: 1px solid rgba(51,65,85,0.5); display: flex; justify-content: space-between; align-items: center; transition: all 0.3s; margin-bottom: 8px; }
+    .loc-card { cursor: pointer; padding: 1rem; border-radius: 0.5em; background: #2e3647; border-right: 1pt solid #9a9797; border-bottom: 1pt solid gray; display: flex; justify-content: space-between; align-items: center; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); margin-bottom: 8px; }
     .loc-card:hover { transform: translateY(-2px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); border-color: var(--accent, #3b82f6); }
     .loc-card.active { border-color: #3b82f6; box-shadow: 0 0 0 1px rgba(59,130,246,0.5); }
     .loc-name { font-weight: 600; font-size: 14px; }
@@ -220,7 +222,7 @@ export class CinegenLocations extends LitElement {
     .loc-badge.has { background: rgba(16,185,129,0.2); color: #10b981; }
     .loc-badge.missing { background: rgba(245,158,11,0.2); color: #f59e0b; }
     .workspace { flex: 1; }
-    .plan-panel { padding: 1.25rem; border-radius: 12px; background: rgba(30,41,59,0.6); backdrop-filter: blur(12px); border: 1px solid rgba(51,65,85,0.5); }
+    .plan-panel { padding: 1.25rem; border-radius: 0.5em; background: #2e3647; border-right: 1pt solid #9a9797; border-bottom: 1pt solid gray; }
     .plan-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
     .plan-title { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 14px; text-transform: uppercase; letter-spacing: 0.05em; }
     .plan-loc-name { font-size: 10px; padding: 2px 12px; background: rgba(30,41,59,0.5); border-radius: 999px; color: var(--text-muted, #64748b); border: 1px solid var(--border, #334155); text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em; }
@@ -326,13 +328,9 @@ export class CinegenLocations extends LitElement {
   }
 }
 
-function classMap(classes) {
-  return Object.entries(classes).filter(([,v]) => v).map(([k]) => k).join(' ');
-}
-
 export class CinegenProps extends LitElement {
   static styles = css`
-    :host { display: block; max-width: 960px; }
+    :host { display: block; max-width: 1200px; }
     h2 { margin-bottom: 4px; }
     .placeholder { text-align: center; padding: 3rem; color: var(--text-muted, #64748b); }
   `;
@@ -341,7 +339,7 @@ export class CinegenProps extends LitElement {
 
 export class CinegenWardrobe extends LitElement {
   static styles = css`
-    :host { display: block; max-width: 960px; }
+    :host { display: block; max-width: 1200px; }
     h2 { margin-bottom: 4px; }
     .placeholder { text-align: center; padding: 3rem; color: var(--text-muted, #64748b); }
   `;

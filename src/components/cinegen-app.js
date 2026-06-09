@@ -23,7 +23,7 @@ export class CineGenApp extends LitElement {
     .top-bar {
       height: 56px;
       border-bottom: 1px solid var(--border, #334155);
-      background: var(--bg-secondary, #1e293b);
+      background: #070c15;
       display: flex;
       align-items: center;
       padding: 0 1.5rem;
@@ -165,7 +165,7 @@ export class CineGenApp extends LitElement {
 
     .left-tabs {
       width: 240px;
-      background: var(--bg-secondary, #1e293b);
+      background: #0b121d;
       border-right: 1px solid var(--border, #334155);
       display: flex;
       flex-direction: column;
@@ -195,7 +195,7 @@ export class CineGenApp extends LitElement {
       cursor: pointer;
       transition: all 0.2s;
       color: var(--text-secondary, #cbd5e1);
-      margin: 0 0.5rem;
+      margin: 4px 0.5rem;
     }
 
     .left-tab:hover {
@@ -267,7 +267,7 @@ export class CineGenApp extends LitElement {
     .top-tabs-bar {
       height: 56px;
       border-bottom: 1px solid var(--border, #334155);
-      background: var(--bg-secondary, #1e293b);
+      background: #0f141c;
       padding: 0 1.5rem;
       display: flex;
       align-items: center;
@@ -336,7 +336,11 @@ export class CineGenApp extends LitElement {
       flex: 1;
       overflow-y: auto;
       padding: 1.5rem;
+      padding-top: 0.75em;
       background: var(--bg-primary, #0f172a);
+      border-top: 1pt solid gray;
+      border-left: 1pt solid gray;
+      border-right: 1px solid white;
     }
 
     .right-inspector {
@@ -449,6 +453,7 @@ export class CineGenApp extends LitElement {
     this.characterCount = 0;
     this.locationCount = 0;
     this._unsubState = null;
+    this._updateTopTabs('script');
   }
 
   connectedCallback() {

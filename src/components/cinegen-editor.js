@@ -14,6 +14,17 @@ export class CinegenEditor extends LitElement {
       width: 100%;
     }
 
+    h2 {
+      color: #96b2cb;
+      font-size: 1.25rem !important;
+      font-family: 'Space Grotesk', sans-serif !important;
+    }
+
+    h3 {
+      border-bottom: 1pt solid #4d4d4d !important;
+      padding-bottom: 0.25em !important;
+    }
+
     .header {
       display: flex;
       align-items: center;
@@ -156,7 +167,9 @@ export class CinegenEditor extends LitElement {
     .editor-wrap {
       background: #0b1220;
       border: 1px solid #1f2a44;
+      border-top: 1pt solid gray;
       border-radius: 12px;
+      box-shadow: 1px 1px 1px white;
       overflow: hidden;
     }
 
@@ -230,10 +243,10 @@ export class CinegenEditor extends LitElement {
       font-family: 'JetBrains Mono', monospace;
       font-size: 13.5px;
       line-height: 1.7;
-      color: #475569;
+      color: #e8f0f8;
       user-select: none;
-      border-right: 1px solid rgba(30, 41, 59, 0.5);
-      background: #0b1220;
+      border-right: 2px solid rgba(0, 100, 100, 0.4);
+      background: darkcyan;
       white-space: pre;
     }
 
@@ -259,10 +272,10 @@ export class CinegenEditor extends LitElement {
     }
 
     .panel {
-      background: rgba(30, 41, 59, 0.6);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(51, 65, 85, 0.5);
-      border-radius: 12px;
+      background: #2e3647;
+      border-right: 1pt solid #9a9797;
+      border-bottom: 1pt solid gray;
+      border-radius: 0.5em;
       padding: 1.25rem;
       transition: all 0.3s;
     }
@@ -270,6 +283,21 @@ export class CinegenEditor extends LitElement {
     .panel:hover {
       transform: translateY(-2px);
       box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3);
+      border-color: var(--accent, #3b82f6);
+    }
+
+    .panelHeadingBlock {
+      border-bottom: 1pt solid #4d4d4d;
+      padding-bottom: 0.25em;
+    }
+
+    .card-hover {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .card-hover:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
       border-color: var(--accent, #3b82f6);
     }
 
@@ -490,7 +518,7 @@ She turns as a shadow falls across the observatory floor.`;
 
   render() {
     return html`
-      <div class="header">
+      <div class="panelHeadingBlock header">
         <div class="header-left">
           <h2>Script Editor</h2>
           <p>Fountain syntax • Auto-parsed entities</p>
